@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#ff4d6d"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="CreatorOS"/>
+<meta name="description" content="Your complete content creation system. Built for Nigerian creators."/>
+<link rel="manifest" href="manifest.json"/>
+<title>CreatorOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=Cormorant+Garamond:ital,wght@0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#07070f;--surface:#0f0f1a;--surface2:#171726;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --red:#ff4d6d;--gold:#f5c842;--green:#06d6a0;--purple:#a78bfa;--orange:#ff7c43;
+  --text:#f2ede4;--muted:rgba(242,237,228,0.42);--muted2:rgba(242,237,228,0.68);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── Install Banner ── */
+#installBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:500;background:linear-gradient(135deg,var(--red),#c9184a);padding:12px 16px;flex-direction:row;align-items:center;gap:10px;font-size:13px;font-weight:500}
+#installBanner.show{display:flex}
+#installBanner button{margin-left:auto;background:white;color:#c9184a;border:none;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border-radius:2px;white-space:nowrap}
+#installBanner .ib-close{background:none;color:rgba(255,255,255,0.7);font-size:18px;padding:0 6px;margin-left:4px}
+
+/* ── Mesh bg ── */
+.bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 50% at 90% 0%,rgba(255,77,109,0.09) 0%,transparent 55%),
+             radial-gradient(ellipse 60% 60% at 0% 100%,rgba(6,214,160,0.06) 0%,transparent 55%),
+             radial-gradient(ellipse 50% 40% at 50% 50%,rgba(167,139,250,0.03) 0%,transparent 65%)}
+
+/* ── Layout ── */
+.app{position:relative;z-index:1;display:grid;grid-template-columns:200px 1fr;min-height:100vh;min-height:100dvh}
+
+/* ── Sidebar ── */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{padding:0 18px 22px;border-bottom:1px solid var(--border);margin-bottom:18px}
+.logo-mark{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;background:linear-gradient(135deg,var(--red),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-sub{font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+
+.nav-group{padding:0 10px;margin-bottom:4px}
+.nav-heading{font-size:8px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);padding:0 8px;margin-bottom:5px}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:9px 8px;cursor:pointer;font-size:12px;font-weight:500;color:var(--muted2);transition:all .16s;margin-bottom:1px;border:1px solid transparent;border-radius:3px;width:100%;background:none;text-align:left;font-family:'DM Sans',sans-serif}
+.nav-btn:hover{background:rgba(255,255,255,0.04);color:var(--text)}
+.nav-btn.active{background:rgba(255,77,109,0.1);color:var(--red);border-color:rgba(255,77,109,0.18)}
+.nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+
+.sidebar-foot{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border)}
+.ng-badge{background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.18);border-radius:3px;padding:8px 10px;font-size:9px;color:var(--green);line-height:1.6}
+
+/* ── Main ── */
+.main{padding:28px 32px 80px;max-width:860px;width:100%}
+.page-hd{margin-bottom:28px}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;letter-spacing:.02em;margin-bottom:5px}
+.page-title span{color:var(--red)}
+.page-desc{font-size:12px;color:var(--muted2);line-height:1.75;max-width:520px}
+
+/* ── Shared ── */
+.sec-label{font-size:8px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;display:flex;align-items:center;gap:9px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.card{background:var(--surface);border:1px solid var(--border);padding:18px;margin-bottom:14px;border-radius:3px;transition:border-color .18s}
+.card:hover{border-color:var(--border2)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;border:none;border-radius:3px;white-space:nowrap}
+.btn-primary{background:linear-gradient(135deg,var(--red),#c9184a);color:white}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(255,77,109,0.35)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-ghost{background:none;border:1px solid var(--border2);color:var(--muted2)}
+.btn-ghost:hover{border-color:var(--text);color:var(--text)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#e6a800);color:#0a0800;font-weight:700}
+.btn-green{background:linear-gradient(135deg,var(--green),#04a87d);color:#001a0f;font-weight:700}
+
+input,textarea,select{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 13px;outline:none;transition:border-color .18s;width:100%;border-radius:3px}
+input:focus,textarea:focus,select:focus{border-color:var(--red)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+textarea{resize:vertical;line-height:1.6}
+select option{background:var(--surface2)}
+label{display:block;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+
+.tag{display:inline-block;font-size:8px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:2px}
+.tag-r{background:rgba(255,77,109,.12);color:var(--red);border:1px solid rgba(255,77,109,.2)}
+.tag-g{background:rgba(6,214,160,.09);color:var(--green);border:1px solid rgba(6,214,160,.15)}
+.tag-y{background:rgba(245,200,66,.1);color:var(--gold);border:1px solid rgba(245,200,66,.18)}
+.tag-p{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.18)}
+
+/* loader */
+.ld{display:flex;align-items:center;gap:11px;padding:20px}
+.ld-bars{display:flex;gap:3px;align-items:flex-end;height:18px}
+.lb{width:3px;border-radius:2px;animation:lbp 1s ease infinite}
+.lb1{background:var(--red);animation-delay:0s}.lb2{background:var(--gold);animation-delay:.12s}.lb3{background:var(--green);animation-delay:.24s}.lb4{background:var(--purple);animation-delay:.36s}
+@keyframes lbp{0%,100%{height:5px;opacity:.45}50%{height:17px;opacity:1}}
+.ld-text{font-size:12px;color:var(--muted2)}
+
+/* empty */
+.empty{text-align:center;padding:52px 20px;border:1px dashed rgba(255,255,255,0.08);border-radius:3px}
+.empty-ico{font-size:38px;opacity:.3;margin-bottom:12px}
+.empty-t{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--muted);letter-spacing:.05em;margin-bottom:5px}
+.empty-s{font-size:12px;color:var(--muted);max-width:300px;margin:0 auto;line-height:1.7}
+
+/* card anim */
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.card-anim{opacity:0;animation:cardIn .32s ease forwards}
+
+/* ══════════════════════════════
+   TRENDS
+══════════════════════════════ */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;margin-bottom:20px}
+.cat-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:11px 9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;transition:all .16s;display:flex;flex-direction:column;gap:5px;text-align:left;border-radius:3px}
+.cat-btn:hover,.cat-btn.active{border-color:var(--red);color:var(--text);background:rgba(255,77,109,0.07)}
+.cat-ico{font-size:17px}
+.input-row{display:flex;gap:9px;margin-bottom:22px}
+.input-row input{flex:1}
+
+.trend-card{background:var(--surface);border:1px solid var(--border);margin-bottom:14px;border-radius:3px;overflow:hidden}
+.trend-head{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.trend-n{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--red);line-height:1;flex-shrink:0}
+.trend-t{font-size:13px;font-weight:700;flex:1;min-width:100px}
+.trend-body{padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.col-l{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.fmt-pill{display:inline-block;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;background:rgba(245,200,66,.09);color:var(--gold);border:1px solid rgba(245,200,66,.16);margin-bottom:6px;border-radius:2px}
+.what{font-size:11px;line-height:1.7;color:var(--muted2)}
+.ideas{list-style:none;display:flex;flex-direction:column;gap:5px}
+.idea-item{font-size:11px;line-height:1.6;color:var(--text);background:rgba(6,214,160,.04);border:1px solid rgba(6,214,160,.09);border-left:3px solid var(--green);padding:8px 11px;cursor:pointer;transition:all .16s;border-radius:0 3px 3px 0}
+.idea-item:hover{background:rgba(6,214,160,.1);transform:translateX(3px)}
+
+/* ══════════════════════════════
+   HOOKS
+══════════════════════════════ */
+.hook-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.hook-form .full{grid-column:1/-1}
+.hook-card{background:var(--surface);border:1px solid var(--border);padding:16px;border-radius:3px;position:relative}
+.hook-n{position:absolute;top:12px;right:14px;font-family:'Bebas Neue',sans-serif;font-size:36px;color:rgba(255,255,255,.04)}
+.hook-type{margin-bottom:7px}
+.hook-text{font-size:14px;font-weight:700;line-height:1.45;margin-bottom:8px}
+.hook-why{font-size:10px;color:var(--muted);font-style:italic;margin-bottom:10px}
+.hook-cap{font-size:11px;line-height:1.7;color:var(--muted2);border-top:1px solid var(--border);padding-top:10px}
+.copy-btn{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;padding:4px 8px;border:1px solid var(--border);background:none;transition:all .16s;border-radius:2px;font-family:'DM Sans',sans-serif}
+.copy-btn:hover{color:var(--text);border-color:var(--border2)}
+.copy-btn.ok{color:var(--green);border-color:rgba(6,214,160,.25)}
+
+/* ══════════════════════════════
+   CALENDAR
+══════════════════════════════ */
+.cal-ctrls{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:22px}
+.cal-ctrls>div{display:flex;flex-direction:column;gap:4px}
+.cal-ctrls select{min-width:140px;width:auto}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:18px}
+.day-col{background:var(--surface);border:1px solid var(--border);border-radius:3px;overflow:hidden;min-height:120px}
+.day-hd{padding:7px 8px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.day-name{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.day-num{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text);line-height:1}
+.day-bd{padding:6px;display:flex;flex-direction:column;gap:4px}
+.chip{font-size:9px;line-height:1.4;padding:4px 6px;border-radius:2px;border-left:2px solid;cursor:default}
+.chip-tk{background:rgba(255,45,85,.09);border-color:#ff2d55;color:#ff8fa3}
+.chip-ig{background:rgba(225,48,108,.09);border-color:#e1306c;color:#f06595}
+.chip-yt{background:rgba(255,0,0,.07);border-color:red;color:#ff7070}
+.sched-cards{display:flex;flex-direction:column;gap:8px}
+.sc{background:var(--surface);border:1px solid var(--border);padding:14px;display:flex;align-items:flex-start;gap:12px;border-radius:3px}
+.sc-time{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);line-height:1;width:48px;flex-shrink:0}
+.sc-title{font-size:12px;font-weight:700;margin-bottom:3px}
+.sc-desc{font-size:10px;color:var(--muted2);line-height:1.6}
+.sc-tags{display:flex;gap:4px;margin-top:5px}
+
+/* ══════════════════════════════
+   CHECKLIST
+══════════════════════════════ */
+.ptabs{display:flex;gap:5px;margin-bottom:20px}
+.ptab{padding:7px 15px;font-size:11px;font-weight:600;letter-spacing:.04em;cursor:pointer;border:1px solid var(--border);color:var(--muted2);transition:all .16s;border-radius:3px;background:none;font-family:'DM Sans',sans-serif}
+.ptab.atk{background:rgba(255,45,85,.1);border-color:#ff2d55;color:#ff8fa3}
+.ptab.aig{background:rgba(225,48,108,.1);border-color:#e1306c;color:#f06595}
+.ptab.ayt{background:rgba(255,0,0,.07);border-color:red;color:#ff7070}
+.prog-wrap{margin-bottom:18px}
+.prog-track{height:4px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold));transition:width .4s ease;border-radius:3px}
+.prog-lbl{font-size:9px;color:var(--muted);margin-top:5px}
+.ck{background:var(--surface);border:1px solid var(--border);padding:13px 15px;display:flex;align-items:flex-start;gap:11px;cursor:pointer;transition:all .16s;border-radius:3px;margin-bottom:7px}
+.ck.done{opacity:.5;border-color:rgba(6,214,160,.18)}
+.ck-box{width:17px;height:17px;border:2px solid var(--border2);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .16s;margin-top:1px}
+.ck.done .ck-box{background:var(--green);border-color:var(--green)}
+.ck-mark{color:#001a0f;font-size:10px;font-weight:900;display:none}
+.ck.done .ck-mark{display:block}
+.ck-title{font-size:12px;font-weight:600;margin-bottom:3px}
+.ck-desc{font-size:11px;color:var(--muted2);line-height:1.6}
+.ck-tip{font-size:10px;color:var(--gold);margin-top:4px;font-style:italic}
+
+/* ══════════════════════════════
+   MONEY
+══════════════════════════════ */
+.tl{position:relative;padding-left:26px}
+.tl::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:linear-gradient(to bottom,var(--red),var(--gold),var(--green))}
+.phase{margin-bottom:30px;position:relative}
+.ph-dot{position:absolute;left:-23px;top:5px;width:12px;height:12px;border-radius:50%;border:2px solid}
+.ph1{background:rgba(255,77,109,.18);border-color:var(--red)}
+.ph2{background:rgba(245,200,66,.18);border-color:var(--gold)}
+.ph3{background:rgba(6,214,160,.18);border-color:var(--green)}
+.ph-lbl{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.ph-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.03em;margin-bottom:9px}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.sm{background:var(--surface);border:1px solid var(--border);padding:11px 13px;border-radius:3px}
+.sm-name{font-size:11px;font-weight:700;margin-bottom:3px}
+.sm-det{font-size:10px;color:var(--muted2);line-height:1.6}
+.sm-earn{font-size:9px;color:var(--gold);margin-top:4px;font-weight:600}
+.real-box{background:rgba(6,214,160,.04);border:1px solid rgba(6,214,160,.14);padding:15px 17px;margin-top:22px;border-radius:3px}
+.real-box .rl{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:7px}
+.real-box p{font-size:11px;line-height:1.8;color:var(--muted2)}
+.real-box p+p{margin-top:7px}
+.real-box strong{color:var(--text)}
+
+/* ══════════════════════════════
+   VIDEO STUDIO — cinematic
+══════════════════════════════ */
+.studio-layout{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start}
+.studio-ctrls{display:flex;flex-direction:column;gap:12px}
+.ctrl-grp{display:flex;flex-direction:column;gap:4px}
+
+/* Themes swatches */
+.theme-swatches{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.swatch{height:44px;cursor:pointer;border:2px solid transparent;border-radius:4px;transition:all .18s;position:relative;overflow:hidden}
+.swatch.sel{border-color:rgba(255,255,255,0.7);box-shadow:0 0 0 1px rgba(255,255,255,0.2)}
+.swatch-name{position:absolute;bottom:0;left:0;right:0;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.75);text-align:center;padding:3px;background:rgba(0,0,0,0.35);backdrop-filter:blur(2px)}
+
+/* Anim buttons */
+.anim-btns{display:flex;gap:5px;flex-wrap:wrap}
+.anim-btn{font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:6px 12px;border:1px solid var(--border);background:none;color:var(--muted2);cursor:pointer;transition:all .16s;border-radius:2px;font-family:'DM Sans',sans-serif}
+.anim-btn.active{border-color:var(--red);color:var(--red);background:rgba(255,77,109,.07)}
+
+/* Canvas preview */
+.preview-wrap{position:sticky;top:20px}
+.prev-lbl{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.quality-badge{font-size:8px;background:rgba(6,214,160,.1);color:var(--green);border:1px solid rgba(6,214,160,.18);padding:2px 7px;border-radius:10px;letter-spacing:.1em}
+#vc{width:100%;aspect-ratio:9/16;border:1px solid var(--border2);border-radius:4px;display:block;box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+.canvas-actions{display:flex;gap:7px;margin-top:8px}
+
+/* ── Modal ── */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
+.modal-back.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);max-width:520px;width:100%;padding:26px;position:relative;border-radius:4px;max-height:88vh;overflow-y:auto;animation:mIn .22s ease}
+@keyframes mIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.m-close{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;transition:color .16s}
+.m-close:hover{color:var(--text)}
+.m-tag{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin-bottom:7px}
+.m-title{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1.2;margin-bottom:14px}
+.m-body{font-size:12px;line-height:1.8;color:var(--muted2)}
+.m-body p{margin-bottom:9px}
+.m-body strong{color:var(--text)}
+.m-body em{color:var(--gold);font-style:normal;font-weight:600}
+
+/* ── Responsive ── */
+@media(max-width:720px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:fixed;bottom:0;top:auto;height:auto;width:100%;flex-direction:row;border-right:none;border-top:1px solid var(--border);padding:8px 8px calc(8px + var(--safe-bottom));z-index:200;overflow-x:auto;gap:0}
+  .sidebar-logo,.sidebar-foot,.nav-heading{display:none}
+  .nav-group{padding:0;display:flex;gap:2px;flex-shrink:0}
+  .nav-btn{flex-direction:column;gap:2px;padding:5px 9px;font-size:8.5px;white-space:nowrap;border-radius:3px}
+  .nav-icon{font-size:17px}
+  .main{padding:18px 14px calc(90px + var(--safe-bottom))}
+  .trend-body,.hook-form,.studio-layout,.sg{grid-template-columns:1fr}
+  .week-grid{grid-template-columns:repeat(4,1fr)}
+  .studio-layout{grid-template-columns:1fr}
+  .preview-wrap{position:relative;top:0}
+  #vc{max-height:60vw;aspect-ratio:auto;width:100%}
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade{opacity:0;animation:fadeUp .38s ease forwards}
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<!-- Install Banner -->
+<div id="installBanner">
+  <span>📲 Add CreatorOS to your home screen</span>
+  <button id="installBtn">Install App</button>
+  <button class="ib-close" onclick="document.getElementById('installBanner').classList.remove('show')">✕</button>
+</div>
+
+<div class="app">
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">CreatorOS</div>
+    <div class="logo-sub">Built for Nigerian creators</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-heading">Discover</div>
+    <button class="nav-btn active" onclick="nav('trends',this)"><span class="nav-icon">📡</span>Trend Finder</button>
+    <button class="nav-btn" onclick="nav('hooks',this)"><span class="nav-icon">🎣</span>Hook Writer</button>
+    <button class="nav-btn" onclick="nav('studio',this)"><span class="nav-icon">🎬</span>Video Studio</button>
+  </div>
+  <div class="nav-group" style="margin-top:10px">
+    <div class="nav-heading">Build</div>
+    <button class="nav-btn" onclick="nav('calendar',this)"><span class="nav-icon">📅</span>Calendar</button>
+    <button class="nav-btn" onclick="nav('checklist',this)"><span class="nav-icon">✅</span>Profile Setup</button>
+    <button class="nav-btn" onclick="nav('money',this)"><span class="nav-icon">💰</span>Money Map</button>
+  </div>
+  <div class="sidebar-foot">
+    <div class="ng-badge">🇳🇬 Tuned for Nigeria. Every path reflects what actually works in Lagos.</div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main" id="mainArea">
+
+<!-- ═══ TRENDS ═══ -->
+<div id="pg-trends" class="fade">
+  <div class="page-hd">
+    <div class="page-title">Trend <span>Finder</span></div>
+    <div class="page-desc">Find what's hitting across TikTok, IG & YouTube — then get original ideas built around your life in Lagos.</div>
+  </div>
+  <div class="sec-label">Pick your niche</div>
+  <div class="cat-grid" id="catGrid">
+    <button class="cat-btn" data-cat="lifestyle"><span class="cat-ico">✨</span>Lifestyle</button>
+    <button class="cat-btn" data-cat="finance"><span class="cat-ico">💰</span>Money & Finance</button>
+    <button class="cat-btn" data-cat="creative"><span class="cat-ico">🎨</span>Art & Design</button>
+    <button class="cat-btn" data-cat="music"><span class="cat-ico">🎵</span>Music & Sound</button>
+    <button class="cat-btn" data-cat="nigeria"><span class="cat-ico">🇳🇬</span>Nigerian Culture</button>
+    <button class="cat-btn" data-cat="health"><span class="cat-ico">🌿</span>Health</button>
+    <button class="cat-btn" data-cat="humor"><span class="cat-ico">😂</span>Humor & Skits</button>
+    <button class="cat-btn" data-cat="storytelling"><span class="cat-ico">📖</span>Storytelling</button>
+  </div>
+  <div class="sec-label">Your angle</div>
+  <div class="input-row">
+    <input id="nicheIn" placeholder="e.g. 28yr Nigerian maternity clinic admin, loves Afrobeats & design…"/>
+    <button class="btn btn-primary" id="genBtn" onclick="genTrends()">Find →</button>
+  </div>
+  <div id="trendsOut"><div class="empty"><div class="empty-ico">📡</div><div class="empty-t">Scanning the Zeitgeist</div><div class="empty-s">Pick a niche, add your angle, hit Find.</div></div></div>
+</div>
+
+<!-- ═══ HOOKS ═══ -->
+<div id="pg-hooks" class="fade" style="display:none">
+  <div class="page-hd">
+    <div class="page-title">Hook <span>&</span> Caption</div>
+    <div class="page-desc">The first 3 seconds determine 80% of your reach. Get 4 hooks + ready-to-post captions.</div>
+  </div>
+  <div class="hook-form">
+    <div class="full"><label>Your content idea</label><input id="hookIdea" placeholder="e.g. Things nobody tells you about working in a maternity ward…"/></div>
+    <div><label>Platform</label><select id="hookPlat"><option value="tiktok">TikTok</option><option value="instagram">Instagram Reels</option><option value="youtube">YouTube Shorts</option></select></div>
+    <div><label>Tone</label><select id="hookTone"><option value="relatable">Relatable & honest</option><option value="informative">Informative</option><option value="humorous">Funny & playful</option><option value="emotional">Emotional & deep</option><option value="hype">Hype & energetic</option></select></div>
+    <div class="full"><button class="btn btn-primary" onclick="genHooks()" id="hookBtn" style="width:100%">Generate Hooks & Captions →</button></div>
+  </div>
+  <div id="hookOut"><div class="empty"><div class="empty-ico">🎣</div><div class="empty-t">No hooks yet</div><div class="empty-s">Enter your idea and generate scroll-stopping hooks.</div></div></div>
+</div>
+
+<!-- ═══ CALENDAR ═══ -->
+<div id="pg-calendar" class="fade" style="display:none">
+  <div class="page-hd">
+    <div class="page-title">Content <span>Calendar</span></div>
+    <div class="page-desc">Your week-by-week posting plan. Consistency beats quality when starting from zero.</div>
+  </div>
+  <div class="cal-ctrls">
+    <div><label>Your niche</label><select id="calNiche"><option value="lifestyle">Lifestyle</option><option value="finance">Money & Finance</option><option value="creative">Art & Creativity</option><option value="nigeria">Nigerian Culture</option><option value="health">Health & Wellness</option><option value="storytelling">Storytelling</option></select></div>
+    <div><label>Stage</label><select id="calStage"><option value="0-3months">Starting out (0–3 mo)</option><option value="3-6months">Growing (3–6 mo)</option><option value="6months+">Scaling (6+ mo)</option></select></div>
+    <button class="btn btn-primary" onclick="genCalendar()" id="calBtn">Build Schedule →</button>
+  </div>
+  <div id="calOut"><div class="empty"><div class="empty-ico">📅</div><div class="empty-t">No schedule yet</div><div class="empty-s">Select niche and stage, then generate.</div></div></div>
+</div>
+
+<!-- ═══ CHECKLIST ═══ -->
+<div id="pg-checklist" class="fade" style="display:none">
+  <div class="page-hd">
+    <div class="page-title">Profile <span>Setup</span></div>
+    <div class="page-desc">Your profile is your storefront. Get this right before you post anything.</div>
+  </div>
+  <div class="ptabs">
+    <button class="ptab atk" onclick="swTab('tiktok',this)">TikTok</button>
+    <button class="ptab" onclick="swTab('instagram',this)">Instagram</button>
+    <button class="ptab" onclick="swTab('youtube',this)">YouTube</button>
+  </div>
+  <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div><div class="prog-lbl" id="progLbl">0 of 0 completed</div></div>
+  <div id="ckList"></div>
+</div>
+
+<!-- ═══ MONEY ═══ -->
+<div id="pg-money" class="fade" style="display:none">
+  <div class="page-hd">
+    <div class="page-title">Money <span>Map</span></div>
+    <div class="page-desc">Your Nigeria-specific path from zero to real income. No Western advice that doesn't apply here.</div>
+  </div>
+  <div class="tl">
+    <div class="phase"><div class="ph-dot ph1"></div><div class="ph-lbl">Phase 1 · Months 0–3</div><div class="ph-title">Build Foundation. Make Zero Naira.</div><p style="font-size:11px;color:var(--muted2);line-height:1.8;margin-bottom:12px">This phase is about signals, not money. Train the algorithm, find your voice, build the habit. Most creators quit here — that is your advantage.</p>
+    <div class="sg">
+      <div class="sm"><div class="sm-name">📱 Post Volume</div><div class="sm-det">4–5×/week. TikTok + Instagram Reels. Same content, both platforms. Phone + daylight + clean background.</div><div class="sm-earn">Goal: 100 followers on each</div></div>
+      <div class="sm"><div class="sm-name">💬 Active Engagement</div><div class="sm-det">Comment on 20+ posts daily in your niche. Reply to every comment. First 100 followers come from YOU, not the algorithm.</div><div class="sm-earn">Goal: 5%+ engagement rate</div></div>
+      <div class="sm"><div class="sm-name">🎬 Content Buffer</div><div class="sm-det">Shoot 5–7 cards when you have power and data. NEPA will not stop your schedule. Always 2 weeks ahead.</div><div class="sm-earn">Goal: 2-week buffer always</div></div>
+      <div class="sm"><div class="sm-name">📺 Open YouTube Now</div><div class="sm-det">Start the clock early. Post Shorts from your TikTok content. Watch hours accumulate while you sleep.</div><div class="sm-earn">Goal: Channel live, 10+ Shorts</div></div>
+    </div></div>
+    <div class="phase"><div class="ph-dot ph2"></div><div class="ph-lbl">Phase 2 · Months 3–9</div><div class="ph-title">First Income: Affiliate + Brand Deals</div><p style="font-size:11px;color:var(--muted2);line-height:1.8;margin-bottom:12px">Activate income streams that need no follower minimum and no platform approval.</p>
+    <div class="sg">
+      <div class="sm"><div class="sm-name">🛒 Jumia Affiliate</div><div class="sm-det">Nigeria's largest e-commerce. Promote niche-relevant products. No follower minimum. Commission per sale.</div><div class="sm-earn">₦20,000–₦150,000/month</div></div>
+      <div class="sm"><div class="sm-name">📚 Expertnaire</div><div class="sm-det">Nigeria's top digital product platform. 50–80% commission on courses and ebooks. High ticket = high commission.</div><div class="sm-earn">Top affiliates: ₦500,000+/mo</div></div>
+      <div class="sm"><div class="sm-name">🤝 Nano Brand Deals</div><div class="sm-det">At 1K–5K followers, DM small Nigerian brands with your engagement stats. Local lifestyle, skincare, food brands.</div><div class="sm-earn">₦40,000–₦150,000/post</div></div>
+      <div class="sm"><div class="sm-name">🎁 TikTok LIVE Gifts</div><div class="sm-det">Go live 2–3×/week. Virtual gifts convert to real money. No follower minimum in Nigeria. Builds fast with consistency.</div><div class="sm-earn">Grows with community</div></div>
+    </div></div>
+    <div class="phase"><div class="ph-dot ph3"></div><div class="ph-lbl">Phase 3 · Month 9+</div><div class="ph-title">Platform Revenue + Scale</div><p style="font-size:11px;color:var(--muted2);line-height:1.8;margin-bottom:12px">YouTube AdSense unlocks. Passive income stacks on top of everything else. Brand deals grow with audience.</p>
+    <div class="sg">
+      <div class="sm"><div class="sm-name">📺 YouTube AdSense</div><div class="sm-det">$1.50–$6.00 RPM for Nigerian creators. Creator Dyna Ekwueme earned $38,000 from YouTube. The most reliable long-term income.</div><div class="sm-earn">Unlocks: 1K subs + 4K hrs</div></div>
+      <div class="sm"><div class="sm-name">💼 Instagram Brand Deals</div><div class="sm-det">At 10K+ followers, macro deals open up. Nigerian macro influencers earn ₦700,000+ per post. Niche + engagement > raw numbers.</div><div class="sm-earn">₦700,000+/sponsored post</div></div>
+      <div class="sm"><div class="sm-name">🏪 Your Own Product</div><div class="sm-det">Digital products on Selar or Gumroad. You know your audience by now. Guides, templates, mini-courses. Unlimited ceiling.</div><div class="sm-earn">You set the price. Fully yours.</div></div>
+      <div class="sm"><div class="sm-name">📘 Facebook Reels</div><div class="sm-det">Opened to Nigeria 2024. Requires 5K followers + 60K minutes watched. Fourth income stream, same content you already make.</div><div class="sm-earn">Requires: 5K followers</div></div>
+    </div></div>
+  </div>
+  <div class="real-box"><div class="rl">⚡ The honest truth</div><p>TikTok's Creator Rewards Program <strong>does not pay Nigerian creators</strong>. Use TikTok as a discovery engine, not a pay cheque.</p><p><strong>YouTube is your most reliable long-term income platform</strong> in Nigeria. Start it now. Time in market matters.</p><p>Top earners <strong>stack multiple streams</strong>: affiliate + brand deals + YouTube AdSense + own product. Build toward all four.</p></div>
+</div>
+
+<!-- ═══ VIDEO STUDIO ═══ -->
+<div id="pg-studio" class="fade" style="display:none">
+  <div class="page-hd">
+    <div class="page-title">Video <span>Studio</span></div>
+    <div class="page-desc">Cinematic animated cards. Screen-record and post as TikToks, Reels, or Shorts. No camera. No face. Full quality.</div>
+  </div>
+  <div class="studio-layout">
+    <div class="studio-ctrls">
+      <div class="sec-label">Content</div>
+      <div class="ctrl-grp"><label>Headline text</label><textarea id="vcText" rows="2" placeholder="Things nobody tells you about working in a maternity ward…" oninput="queueDraw()"></textarea></div>
+      <div class="ctrl-grp"><label>Subtext / Episode label</label><input id="vcSub" type="text" placeholder="Part 1 of 5" oninput="queueDraw()"/></div>
+      <div class="ctrl-grp"><label>Your handle</label><input id="vcHandle" type="text" placeholder="@yourhandle" oninput="queueDraw()"/></div>
+
+      <div class="sec-label" style="margin-top:4px">Visual Theme</div>
+      <div class="theme-swatches" id="swatches"></div>
+
+      <div class="sec-label" style="margin-top:4px">Animation</div>
+      <div class="anim-btns">
+        <button class="anim-btn active" data-an="breathe" onclick="selAnim(this)">Breathe</button>
+        <button class="anim-btn" data-an="reveal" onclick="selAnim(this)">Reveal</button>
+        <button class="anim-btn" data-an="glitch" onclick="selAnim(this)">Glitch</button>
+        <button class="anim-btn" data-an="typewriter" onclick="selAnim(this)">Typewriter</button>
+        <button class="anim-btn" data-an="float" onclick="selAnim(this)">Float</button>
+      </div>
+
+      <div class="sec-label" style="margin-top:4px">✦ AI Generate</div>
+      <div class="ctrl-grp"><textarea id="aiPrompt" rows="2" placeholder="Describe your video idea e.g. 'A moody card about quiet moments between deliveries at the clinic'"></textarea></div>
+      <button class="btn btn-primary" onclick="aiGenText()" id="aiBtn" style="width:100%">✦ Generate Visual Text</button>
+      <button class="btn btn-green" onclick="showRecordGuide()" style="width:100%;margin-top:4px">📲 How to Record & Post</button>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="prev-lbl">
+        <span>Live Preview · 9:16 Portrait</span>
+        <span class="quality-badge">HD 450×800</span>
+      </div>
+      <canvas id="vc" width="450" height="800"></canvas>
+      <div class="canvas-actions">
+        <button class="btn btn-ghost" onclick="queueDraw()" style="flex:1">↻ Refresh</button>
+        <button class="btn btn-ghost" onclick="dlFrame()" style="flex:1">↓ Save PNG</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- Modal -->
+<div class="modal-back" id="mBack" onclick="closeMod(event)">
+  <div class="modal">
+    <button class="m-close" onclick="closeModDirect()">✕</button>
+    <div class="m-tag" id="mTag">Brief</div>
+    <div class="m-title" id="mTitle"></div>
+    <div id="mBody"><div class="ld"><div class="ld-bars"><div class="lb lb1"></div><div class="lb lb2"></div><div class="lb lb3"></div><div class="lb lb4"></div></div><span class="ld-text">Loading…</span></div></div>
+  </div>
+</div>
+
+<script>
+// ── PWA install ──────────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+document.getElementById('installBtn').addEventListener('click', () => {
+  document.getElementById('installBanner').classList.remove('show');
+  if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; }); }
+});
+// Service Worker for offline
+if('serviceWorker' in navigator){
+  const sw = `self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))));`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+}
+
+// ── Navigation ───────────────────────────────────
+function nav(id, el) {
+  document.querySelectorAll('[id^="pg-"]').forEach(p=>p.style.display='none');
+  document.getElementById('pg-'+id).style.display='block';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  if(id==='studio') setTimeout(()=>{buildSwatches();queueDraw();},80);
+  if(id==='checklist') renderCk(curPlat);
+}
+
+// ── Claude API ───────────────────────────────────
+async function claude(sys,usr,tok=1000){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:tok,system:sys,messages:[{role:'user',content:usr}]})});
+  const d=await r.json(); return d.content.map(b=>b.text||'').join('');
+}
+function ldHTML(msg){return `<div class="ld"><div class="ld-bars"><div class="lb lb1"></div><div class="lb lb2"></div><div class="lb lb3"></div><div class="lb lb4"></div></div><span class="ld-text">${msg}</span></div>`;}
+function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,' ');}
+
+// ── TRENDS ──────────────────────────────────────
+let selCat='';
+document.querySelectorAll('.cat-btn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); selCat=b.dataset.cat;
+}));
+
+async function genTrends(){
+  const niche=document.getElementById('nicheIn').value.trim();
+  if(!selCat&&!niche){document.getElementById('nicheIn').focus();return;}
+  const btn=document.getElementById('genBtn'); btn.disabled=true; btn.textContent='Scanning…';
+  const catLbl=selCat?document.querySelector(`[data-cat="${selCat}"]`)?.textContent:'';
+  document.getElementById('trendsOut').innerHTML=ldHTML('Scanning TikTok, Instagram & YouTube…');
+  try{
+    const raw=await claude(
+      `You are a top social media strategist for African creators. Identify REAL trending formats. Help creators make ORIGINAL work, never copies. JSON only, no markdown.`,
+      `4 trending content formats for niche:"${catLbl||'general'}". Creator:${niche||'Nigerian creator, Lagos'}.
+JSON:{"trends":[{"id":1,"title":"Name","platforms":["tiktok","instagram","youtube"],"format":"Format type","what_it_is":"2-3 sentences","original_ideas":["Idea 1","Idea 2","Idea 3"]}]}`
+    );
+    const d=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const pt=p=>({'tiktok':'<span class="tag tag-r">TikTok</span>','instagram':'<span class="tag" style="background:rgba(225,48,108,.1);color:#f06595;border:1px solid rgba(225,48,108,.18)">IG</span>','youtube':'<span class="tag" style="background:rgba(255,0,0,.07);color:#ff7070;border:1px solid rgba(255,0,0,.15)">YT</span>'})[p]||'';
+    document.getElementById('trendsOut').innerHTML=d.trends.map((t,i)=>`
+      <div class="trend-card card-anim" style="animation-delay:${i*.08}s">
+        <div class="trend-head"><div class="trend-n">0${i+1}</div><div class="trend-t">${t.title}</div><div style="display:flex;gap:4px">${(t.platforms||[]).map(pt).join('')}</div></div>
+        <div class="trend-body">
+          <div><div class="col-l"><span class="dot" style="background:var(--red)"></span>The Trend</div><div class="fmt-pill">${t.format||'Video'}</div><div class="what">${t.what_it_is}</div></div>
+          <div><div class="col-l"><span class="dot" style="background:var(--green)"></span>Your Original Ideas</div><div style="font-size:9px;color:var(--muted);margin-bottom:6px">Click any idea for a full brief</div>
+          <ul class="ideas">${(t.original_ideas||[]).map(idea=>`<li class="idea-item" onclick="expandIdea('${esc(idea)}')">${idea}</li>`).join('')}</ul></div>
+        </div>
+      </div>`).join('');
+  }catch{document.getElementById('trendsOut').innerHTML=`<div class="card" style="border-color:var(--red);color:var(--red)">⚠ Couldn't load. Check connection.</div>`;}
+  btn.disabled=false; btn.textContent='Find →';
+}
+
+async function expandIdea(idea){
+  document.getElementById('mTitle').textContent=idea; document.getElementById('mTag').textContent='Content Brief';
+  document.getElementById('mBody').innerHTML=ldHTML('Building your brief…');
+  document.getElementById('mBack').classList.add('open');
+  const niche=document.getElementById('nicheIn').value.trim();
+  try{
+    const html=await claude(`Social media content strategist. Concise brief. Respond in plain HTML, only <p><strong><em> tags. Under 200 words. Specific.`,
+      `Brief for:"${idea}"\nCreator:${niche||'Nigerian, 28, Lagos, maternity clinic admin'}\nCover: hook (first 3s), format, tone, personal detail to include, caption angle, one Nigeria-specific tip.`);
+    document.getElementById('mBody').innerHTML=`<div class="m-body">${html}</div>`;
+  }catch{document.getElementById('mBody').innerHTML=`<p style="color:var(--muted)">Couldn't load. Try again.</p>`;}
+}
+
+// ── HOOKS ────────────────────────────────────────
+async function genHooks(){
+  const idea=document.getElementById('hookIdea').value.trim();
+  if(!idea){document.getElementById('hookIdea').focus();return;}
+  const btn=document.getElementById('hookBtn'); btn.disabled=true; btn.textContent='Writing…';
+  document.getElementById('hookOut').innerHTML=ldHTML('Crafting scroll-stopping hooks…');
+  try{
+    const raw=await claude(`Expert social media copywriter for African creators. Viral hooks and captions. JSON only.`,
+      `4 hooks+captions for:"${idea}" on ${document.getElementById('hookPlat').value}, tone:${document.getElementById('hookTone').value}. Creator:Nigerian,28,Lagos,maternity clinic,Afrobeats lover.
+JSON:{"hooks":[{"type":"Hook type","hook":"Under 15 words","caption":"Full caption with emojis + 3-5 Nigerian/niche hashtags","why":"Why this hook works in one sentence"}]}`
+    ,1200);
+    const d=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    document.getElementById('hookOut').innerHTML=`<div style="display:flex;flex-direction:column;gap:10px">${d.hooks.map((h,i)=>`
+      <div class="hook-card card-anim" style="animation-delay:${i*.07}s">
+        <div class="hook-n">${i+1}</div>
+        <div class="hook-type"><span class="tag tag-y">${h.type}</span></div>
+        <div class="hook-text">"${h.hook}"</div>
+        <div class="hook-why">${h.why}</div>
+        <div class="hook-cap">${h.caption}</div>
+        <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:10px">
+          <button class="copy-btn" onclick="cp('${esc(h.hook)}',this)">Copy Hook</button>
+          <button class="copy-btn" onclick="cp('${esc(h.caption)}',this)">Copy Caption</button>
+        </div>
+      </div>`).join('')}</div>`;
+  }catch{document.getElementById('hookOut').innerHTML=`<div class="card" style="border-color:var(--red)">⚠ Couldn't generate. Try again.</div>`;}
+  btn.disabled=false; btn.textContent='Generate Hooks & Captions →';
+}
+function cp(t,btn){navigator.clipboard.writeText(t).then(()=>{const o=btn.textContent;btn.textContent='✓ Copied';btn.classList.add('ok');setTimeout(()=>{btn.textContent=o;btn.classList.remove('ok');},2000);});}
+
+// ── CALENDAR ─────────────────────────────────────
+async function genCalendar(){
+  const btn=document.getElementById('calBtn'); btn.disabled=true; btn.textContent='Building…';
+  document.getElementById('calOut').innerHTML=ldHTML('Building your optimal posting schedule…');
+  try{
+    const raw=await claude(`Social media growth strategist for Nigerian creators. JSON only.`,
+      `Weekly content calendar for Nigerian ${document.getElementById('calNiche').value} creator, stage:${document.getElementById('calStage').value}. They use TikTok+Instagram+YouTube. 9-5 worker. NEPA load-shedding. Prefers faceless content.
+JSON:{"week_theme":"Theme","days":[{"day":"Mon","posts":[{"platform":"tiktok","time":"7pm","content_type":"Format","idea":"Specific idea","tip":"Execution tip"}]}],"power_tip":"Nigeria-specific power tip"}`
+    ,1400);
+    const d=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const cc=p=>({'tiktok':'chip-tk','instagram':'chip-ig','youtube':'chip-yt'})[p]||'';
+    document.getElementById('calOut').innerHTML=`
+      <div class="card" style="border-color:rgba(167,139,250,.18);margin-bottom:18px"><div class="col-l" style="margin-bottom:5px"><span class="dot" style="background:var(--purple)"></span>This Week's Theme</div><div style="font-size:14px;font-weight:700">${d.week_theme||''}</div></div>
+      <div class="week-grid" style="margin-bottom:16px">${(d.days||[]).map(dy=>`<div class="day-col"><div class="day-hd"><div class="day-name">${dy.day}</div></div><div class="day-bd">${(dy.posts||[]).map(p=>`<div class="chip ${cc(p.platform)}" title="${p.idea}"><strong>${p.time}</strong> ${p.content_type}</div>`).join('')||'<div style="font-size:9px;color:var(--muted);padding:2px">Rest ✦</div>'}</div></div>`).join('')}</div>
+      <div class="sched-cards">${(d.days||[]).filter(dy=>dy.posts&&dy.posts.length).map(dy=>dy.posts.map(p=>`<div class="sc card-anim"><div class="sc-time">${p.time}</div><div><div class="sc-title">${dy.day} — ${p.idea}</div><div class="sc-desc">${p.tip||''}</div><div class="sc-tags"><span class="tag ${p.platform==='tiktok'?'tag-r':p.platform==='youtube'?'tag-r':'tag-g'}">${p.platform}</span></div></div></div>`).join('')).join('')}</div>
+      ${d.power_tip?`<div class="real-box" style="margin-top:16px"><div class="rl">⚡ Power Tip</div><p>${d.power_tip}</p></div>`:''}`;
+  }catch{document.getElementById('calOut').innerHTML=`<div class="card" style="border-color:var(--red)">⚠ Couldn't build. Try again.</div>`;}
+  btn.disabled=false; btn.textContent='Build Schedule →';
+}
+
+// ── CHECKLIST ────────────────────────────────────
+let curPlat='tiktok'; let ckState={};
+const ckData={
+  tiktok:[
+    {t:'Profile photo',d:'Bold, clear graphic — a distinctive visual or pattern. No face required. Recognisable at thumbnail size.',tip:'Try a colour-blocked graphic matching your niche vibe.'},
+    {t:'Username',d:'Short, memorable, easy to spell. No numbers or underscores. Consistent across all platforms.',tip:'Your handle is your brand name. Choose once, stick forever.'},
+    {t:'Bio (80 chars)',d:'State who you make content for and what you give them. E.g. "Lagos life, unfiltered 🇳🇬 | Creativity + culture"',tip:'Include one emoji that represents your vibe. End with a soft CTA.'},
+    {t:'Link in bio',d:'Point to your most important platform — usually YouTube or a Linktree.',tip:'Linktree free tier is enough to start.'},
+    {t:'First 3 videos pinned',d:'Pin content that shows what your channel is about clearly. Your best first impression.',tip:'Repost your 3 clearest, most watchable videos here.'},
+    {t:'Category selected',d:'Set account category in TikTok Studio to help the algorithm understand your content.',tip:''},
+    {t:'Reply to every comment',d:'In your first month, reply to every single comment. Speed of response signals you are active.',tip:'Set a daily 15-minute window just for replies.'},
+    {t:'TikTok Studio connected',d:'Download TikTok Studio to track analytics. Post for 2 weeks before reading them — you need data first.',tip:''},
+  ],
+  instagram:[
+    {t:'Switch to Creator account',d:'Settings → Account → Switch to Professional → Creator. Unlocks analytics and contact buttons.',tip:''},
+    {t:'Profile photo',d:'Same brand graphic as TikTok. Consistent identity across platforms. Recognisable at 40px circle.',tip:''},
+    {t:'Username',d:'Match your TikTok handle exactly. Cross-platform consistency builds recognition faster.',tip:''},
+    {t:'Bio (150 chars)',d:'Line 1: Who you are. Line 2: What you make. Line 3: CTA + link. Use line breaks.',tip:'IG bios allow line breaks — use them. Walls of text get skipped.'},
+    {t:'Link in bio',d:'Linktree or direct YouTube link. One destination. Instagram allows one link — use it wisely.',tip:''},
+    {t:'First 9 posts — the grid',d:'Your grid is your storefront. First 9 posts should show your niche clearly and look cohesive.',tip:'Plan these before you go public. Consistent colours make the grid intentional.'},
+    {t:'Story Highlights',d:'Create 3–5 Highlights with custom cover graphics. Treat like menu items: About, Content, Nigeria.',tip:'Canva free highlight cover templates. Match your brand colours.'},
+    {t:'Reel cover images',d:'Set a custom thumbnail for every Reel. A blank frame loses 40% of potential viewers.',tip:'Bold text overlay or graphic — Canva works perfectly.'},
+  ],
+  youtube:[
+    {t:'Channel name',d:'Match your TikTok and IG handle exactly. Consistent identity everywhere.',tip:''},
+    {t:'Channel art / banner',d:'2560×1440px banner with your niche statement and posting schedule. Canva has free templates.',tip:'State when you post — sets expectations and builds habits in your audience.'},
+    {t:'Channel icon',d:'Same graphic used on TikTok and Instagram. Brand consistency = faster recognition.',tip:''},
+    {t:'About section',d:'150–200 words describing who you are, what you make, and who it is for. Include keywords.',tip:'Keywords in About help YouTube surface your channel in search.'},
+    {t:'Channel trailer',d:'60–90 second video: who you are and why someone should subscribe. Faceless is fine — text + music works.',tip:'This plays automatically to non-subscribers. Make it your best.'},
+    {t:'Playlists created',d:'Group content into 2–3 playlists from the start. Playlists increase watch time.',tip:''},
+    {t:'End screens set up',d:'Add end screens to every video pointing to another video or subscribe button.',tip:'Set a template once and apply to every upload.'},
+    {t:'YouTube Studio analytics',d:'Check after every video: average view duration and click-through rate are your two most important numbers.',tip:'Target: 40%+ CTR, 50%+ average view duration.'},
+  ]
+};
+
+function swTab(p,el){
+  document.querySelectorAll('.ptab').forEach(t=>t.className='ptab');
+  el.className=`ptab a${p}`;
+  curPlat=p; renderCk(p);
+}
+function renderCk(p){
+  const items=ckData[p]||[];
+  if(!ckState[p]) ckState[p]=items.map(()=>false);
+  const done=ckState[p].filter(Boolean).length;
+  const pct=items.length?done/items.length*100:0;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progLbl').textContent=`${done} of ${items.length} completed`;
+  document.getElementById('ckList').innerHTML=items.map((item,i)=>`
+    <div class="ck ${ckState[p][i]?'done':''}" onclick="togCk('${p}',${i})">
+      <div class="ck-box"><span class="ck-mark">✓</span></div>
+      <div><div class="ck-title">${item.t}</div><div class="ck-desc">${item.d}</div>${item.tip?`<div class="ck-tip">💡 ${item.tip}</div>`:''}</div>
+    </div>`).join('');
+}
+function togCk(p,i){ckState[p][i]=!ckState[p][i];renderCk(p);}
+
+// ── VIDEO STUDIO ─────────────────────────────────
+const themes={
+  'cinematic-night':{bg0:'#04030d',bg1:'#0a0520',bg2:'#0d0a1f',ac:'#a78bfa',ac2:'#ff4d6d',txt:'#f0eee8',mut:'rgba(240,238,232,0.45)',name:'Night Cinema'},
+  'afro-heat':{bg0:'#0c0400',bg1:'#1a0700',bg2:'#200c00',ac:'#ff7c43',ac2:'#f5c842',txt:'#fff5e0',mut:'rgba(255,245,224,0.45)',name:'Afro Heat'},
+  'lagoon':{bg0:'#00080d',bg1:'#001218',bg2:'#001820',ac:'#06d6a0',ac2:'#6ab3c8',txt:'#e0f5f0',mut:'rgba(224,245,240,0.45)',name:'Lagos Lagoon'},
+  'editorial':{bg0:'#f2ede4',bg1:'#e8e0d0',bg2:'#ddd4c0',ac:'#0d0d14',ac2:'#c94c2e',txt:'#0d0d14',mut:'rgba(13,13,20,0.42)',name:'Editorial'},
+  'naija-gold':{bg0:'#080600',bg1:'#141000',bg2:'#1c1600',ac:'#f5c842',ac2:'#06d6a0',txt:'#fffbe0',mut:'rgba(255,251,224,0.45)',name:'Naija Gold'},
+  'blood-moon':{bg0:'#0d0000',bg1:'#1a0000',bg2:'#200400',ac:'#ff4d6d',ac2:'#ff7c43',txt:'#fff0f0',mut:'rgba(255,240,240,0.45)',name:'Blood Moon'},
+};
+
+let curTheme='cinematic-night', curAnim='breathe', animFrame=null, animT=0, drawPending=false;
+
+function buildSwatches(){
+  const gradients={'cinematic-night':'linear-gradient(135deg,#04030d,#0a0520)','afro-heat':'linear-gradient(135deg,#0c0400,#200c00)','lagoon':'linear-gradient(135deg,#00080d,#001820)','editorial':'linear-gradient(135deg,#f2ede4,#ddd4c0)','naija-gold':'linear-gradient(135deg,#080600,#1c1600)','blood-moon':'linear-gradient(135deg,#0d0000,#200400)'};
+  document.getElementById('swatches').innerHTML=Object.entries(themes).map(([k,v])=>`
+    <div class="swatch ${k===curTheme?'sel':''}" data-th="${k}" onclick="selTheme(this)" style="background:${gradients[k]}">
+      <span class="swatch-name">${v.name}</span>
+    </div>`).join('');
+}
+
+function selTheme(el){
+  document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('sel'));
+  el.classList.add('sel'); curTheme=el.dataset.th; queueDraw();
+}
+function selAnim(el){
+  document.querySelectorAll('.anim-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active'); curAnim=el.dataset.an; queueDraw();
+}
+
+function queueDraw(){
+  if(!drawPending){ drawPending=true; requestAnimationFrame(()=>{ drawPending=false; startDraw(); }); }
+}
+
+function startDraw(){
+  if(animFrame) cancelAnimationFrame(animFrame);
+  animT=0;
+  function loop(t){ drawFrame(t); animFrame=requestAnimationFrame(loop); }
+  animFrame=requestAnimationFrame(loop);
+}
+
+// ── CINEMATIC CANVAS RENDERER ─────────────────────
+function drawFrame(timestamp){
+  const canvas=document.getElementById('vc');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  const th=themes[curTheme];
+  const t=timestamp/1000; // seconds
+
+  // ── Background — multi-layer gradient ──
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,th.bg0); bg.addColorStop(0.5,th.bg1); bg.addColorStop(1,th.bg2);
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // ── Radial glow layers ──
+  const breathe=curAnim==='breathe'?0.7+Math.sin(t*0.8)*0.3:1;
+  const float=curAnim==='float'?Math.sin(t*0.5)*18:0;
+
+  // Glow 1 — top right
+  const g1=ctx.createRadialGradient(W*0.85,H*0.15,0,W*0.85,H*0.15,W*0.7);
+  g1.addColorStop(0,th.ac+'28'); g1.addColorStop(0.5,th.ac+'0a'); g1.addColorStop(1,'transparent');
+  ctx.fillStyle=g1; ctx.fillRect(0,0,W,H);
+
+  // Glow 2 — bottom left
+  const g2=ctx.createRadialGradient(W*0.1,H*0.85,0,W*0.1,H*0.85,W*0.6);
+  g2.addColorStop(0,th.ac2+'18'); g2.addColorStop(1,'transparent');
+  ctx.fillStyle=g2; ctx.fillRect(0,0,W,H);
+
+  // ── Grain texture ──
+  const isDark=curTheme!=='editorial';
+  const grainOpacity=isDark?0.04:0.025;
+  for(let i=0;i<1200;i++){
+    const x=Math.random()*W, y=Math.random()*H;
+    const a=Math.random()*grainOpacity;
+    ctx.fillStyle=`rgba(${isDark?'255,255,255':'0,0,0'},${a})`;
+    ctx.fillRect(x,y,1,1);
+  }
+
+  // ── Geometric accent — diagonal lines ──
+  ctx.save();
+  ctx.globalAlpha=0.06;
+  ctx.strokeStyle=th.ac;
+  ctx.lineWidth=1;
+  for(let i=-5;i<12;i++){
+    ctx.beginPath();
+    ctx.moveTo(i*60-30,0); ctx.lineTo(i*60+H*0.4+30,H);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // ── Accent bar — left edge ──
+  const barH=120; const barY=(H-barH)/2+float*0.5;
+  const barGrd=ctx.createLinearGradient(0,barY,0,barY+barH);
+  barGrd.addColorStop(0,'transparent'); barGrd.addColorStop(0.5,th.ac); barGrd.addColorStop(1,'transparent');
+  ctx.fillStyle=barGrd; ctx.fillRect(0,barY,3,barH);
+
+  // ── Decorative circle ──
+  ctx.save();
+  ctx.globalAlpha=0.12*breathe;
+  ctx.strokeStyle=th.ac;
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.arc(W*0.82,H*0.2,70+Math.sin(t*0.6)*8,0,Math.PI*2);
+  ctx.stroke();
+  ctx.globalAlpha=0.06*breathe;
+  ctx.beginPath();
+  ctx.arc(W*0.82,H*0.2,95+Math.sin(t*0.4)*10,0,Math.PI*2);
+  ctx.stroke();
+  ctx.restore();
+
+  // ── Handle text ──
+  const handle=document.getElementById('vcHandle')?.value||'@yourhandle';
+  ctx.font='500 18px "DM Sans",sans-serif';
+  ctx.fillStyle=th.mut;
+  ctx.textAlign='left';
+  ctx.fillText(handle,36,68+float*0.2);
+
+  // ── Horizontal rule ──
+  const hrGrd=ctx.createLinearGradient(36,0,W-36,0);
+  hrGrd.addColorStop(0,th.ac+'80'); hrGrd.addColorStop(0.5,th.ac+'cc'); hrGrd.addColorStop(1,'transparent');
+  ctx.strokeStyle=hrGrd; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(36,84); ctx.lineTo(W-36,84); ctx.stroke();
+
+  // ── Main headline ──
+  const rawText=document.getElementById('vcText')?.value||'Your headline here…';
+  let displayText=rawText;
+
+  if(curAnim==='typewriter'){
+    const chars=Math.floor(t*12)%(rawText.length+15);
+    displayText=rawText.slice(0,Math.min(chars,rawText.length));
+  }
+
+  // Word wrap
+  ctx.font=`700 ${rawText.length>55?38:rawText.length>35?44:50}px "Bebas Neue",sans-serif`;
+  ctx.letterSpacing='0.02em';
+  const maxW=W-72;
+  const lineH=ctx.measureText('M').width*1.3;
+  const lines=[];
+  let line='';
+  displayText.split(' ').forEach(w=>{
+    const test=line+(line?' ':'')+w;
+    if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=w;}
+    else line=test;
+  });
+  if(line) lines.push(line);
+
+  const totalH=lines.length*(lineH+6);
+  const startY=(H*0.5-totalH/2)+float;
+
+  // reveal animation
+  const revealProgress=curAnim==='reveal'?Math.min(1,t*0.8):1;
+
+  ctx.save();
+  lines.forEach((ln,i)=>{
+    const y=startY+i*(lineH+6);
+    const lineReveal=curAnim==='reveal'?Math.min(1,Math.max(0,(revealProgress*lines.length-i))):1;
+    ctx.globalAlpha=lineReveal;
+
+    // glitch effect
+    if(curAnim==='glitch'&&Math.sin(t*7)>0.75&&Math.random()>0.5){
+      const off=(Math.random()-0.5)*12;
+      ctx.fillStyle=th.ac+'cc'; ctx.fillText(ln,36+off,y);
+      ctx.fillStyle=th.ac2+'cc'; ctx.fillText(ln,36-off,y+2);
+    }
+    ctx.fillStyle=th.txt;
+    ctx.fillText(ln,36,y);
+  });
+  ctx.restore();
+
+  // ── Subtext ──
+  const sub=document.getElementById('vcSub')?.value||'';
+  if(sub){
+    const subY=startY+totalH+22+float*0.5;
+    ctx.font='500 22px "DM Sans",sans-serif';
+    ctx.fillStyle=th.ac2;
+    ctx.globalAlpha=0.9;
+    ctx.fillText(sub,36,subY);
+    ctx.globalAlpha=1;
+  }
+
+  // ── Bottom section ──
+  const botY=H-70;
+
+  // Bottom rule
+  const brGrd=ctx.createLinearGradient(36,0,W-36,0);
+  brGrd.addColorStop(0,th.ac+'cc'); brGrd.addColorStop(0.6,th.ac+'44'); brGrd.addColorStop(1,'transparent');
+  ctx.strokeStyle=brGrd; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(36,botY); ctx.lineTo(W-36,botY); ctx.stroke();
+
+  // Pulse dots bottom right
+  if(curAnim==='breathe'||curAnim==='float'){
+    for(let r=0;r<3;r++){
+      const rad=10+r*14+Math.sin(t*1.2+r*0.8)*5;
+      ctx.save();
+      ctx.globalAlpha=(0.5-r*0.12)*breathe;
+      ctx.strokeStyle=th.ac;
+      ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(W-40,H-40,rad,0,Math.PI*2); ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // Bottom label
+  ctx.font='400 15px "DM Sans",sans-serif';
+  ctx.fillStyle=th.mut;
+  ctx.textAlign='left';
+  ctx.fillText('CreatorOS',36,H-38);
+  ctx.font='400 13px "DM Sans",sans-serif';
+  ctx.fillStyle=th.mut;
+  ctx.fillText('Faceless. Original. Yours.',36,H-18);
+}
+
+async function aiGenText(){
+  const p=document.getElementById('aiPrompt').value.trim(); if(!p) return;
+  const btn=document.getElementById('aiBtn'); btn.disabled=true; btn.textContent='✦ Generating…';
+  try{
+    const raw=await claude(`Generate punchy visual text for social media video cards. JSON only, no markdown.`,
+      `Visual text for:"${p}"\nJSON:{"headline":"Max 8 words, bold and punchy","subtext":"2-4 words max"}`);
+    const d=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    document.getElementById('vcText').value=d.headline||'';
+    document.getElementById('vcSub').value=d.subtext||'';
+    queueDraw();
+  }catch{}
+  btn.disabled=false; btn.textContent='✦ Generate Visual Text';
+}
+
+function dlFrame(){
+  if(animFrame) cancelAnimationFrame(animFrame);
+  drawFrame(performance.now());
+  const canvas=document.getElementById('vc');
+  const link=document.createElement('a');
+  link.download=`creatorOS-card-${Date.now()}.png`;
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+  startDraw();
+}
+
+function showRecordGuide(){
+  document.getElementById('mTag').textContent='How to Post';
+  document.getElementById('mTitle').textContent='Screen Record → Post as Reel / TikTok / Short';
+  document.getElementById('mBody').innerHTML=`<div class="m-body">
+    <p><strong>Step 1 — Open this page on your Android phone</strong> in Chrome. Type the URL or open from your files app.</p>
+    <p><strong>Step 2 — Install it as an app.</strong> Tap the three-dot menu in Chrome → "Add to Home Screen." It will install like a real app with its own icon.</p>
+    <p><strong>Step 3 — Open the Video Studio tab.</strong> Type your headline, pick a theme, and choose an animation style.</p>
+    <p><strong>Step 4 — Start screen recording.</strong> Swipe down from the top of your Android screen → tap <em>Screen Record</em>. Give it 2–3 seconds to start, then switch to the app.</p>
+    <p><strong>Step 5 — Record 10–30 seconds</strong> of the animation. The Breathe and Float styles look best on screen recordings.</p>
+    <p><strong>Step 6 — Stop recording.</strong> The video saves to your Gallery automatically.</p>
+    <p><strong>Step 7 — Post to TikTok, Instagram Reels, or YouTube Shorts.</strong> Add a trending audio track inside the app after uploading — this gives you reach without recording your voice.</p>
+    <p><em>Nigeria tip:</em> Shoot 5–7 different cards while you have WiFi and light. Save all to Gallery. Post one per day throughout the week even if NEPA takes light. Buffer = consistency.</p>
+  </div>`;
+  document.getElementById('mBack').classList.add('open');
+}
+
+// ── Modal ────────────────────────────────────────
+function closeMod(e){if(e.target===document.getElementById('mBack'))closeModDirect();}
+function closeModDirect(){document.getElementById('mBack').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModDirect();});
+
+// ── Init ────────────────────────────────────────
+renderCk('tiktok');
+buildSwatches();
+setTimeout(()=>{ startDraw(); },200);
+</script>
+</body>
+</html>
