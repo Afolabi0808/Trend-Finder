@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CreatorOS — Nigerian Creator Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #07070f;
+    --surface: #0f0f1a;
+    --s2: #171726;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --red: #ff4d6d;
+    --gold: #f5c842;
+    --green: #06d6a0;
+    --purple: #a78bfa;
+    --orange: #ff7c43;
+    --pink: #fb7185;
+    --text: #f2ede4;
+    --muted: rgba(242,237,228,0.4);
+    --muted2: rgba(242,237,228,0.68);
+  }
+
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Ambient glow */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 90% 0%, rgba(255,77,109,0.09), transparent 55%),
+      radial-gradient(ellipse 60% 60% at 0% 100%, rgba(6,214,160,0.06), transparent 55%);
+  }
+
+  #app { position: relative; z-index: 1; display: grid; grid-template-columns: 215px 1fr; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 24px 0;
+  }
+
+  .sidebar-logo { padding: 0 18px 22px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+  .sidebar-logo h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--red), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .sidebar-logo p { font-size: 8px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+
+  .nav-group { padding: 0 10px; margin-bottom: 10px; }
+  .nav-group-label { font-size: 8px; letter-spacing: .26em; text-transform: uppercase; color: var(--muted); padding: 0 8px; margin-bottom: 7px; }
+
+  .nav-btn {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 8px; cursor: pointer; font-size: 12px; font-weight: 500;
+    color: var(--muted2); background: none;
+    border: 1px solid transparent; border-radius: 3px;
+    width: 100%; text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    margin-bottom: 1px; transition: all .14s;
+  }
+  .nav-btn:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .nav-btn.active { color: var(--red); background: rgba(255,77,109,0.13); border-color: rgba(255,77,109,0.25); font-weight: 700; }
+  .nav-btn .ico { font-size: 14px; width: 18px; text-align: center; }
+
+  .sidebar-footer { margin-top: auto; padding: 14px 16px; border-top: 1px solid var(--border); }
+  .sidebar-badge { background: rgba(6,214,160,0.1); border: 1px solid rgba(6,214,160,0.25); border-radius: 3px; padding: 9px 12px; font-size: 9px; color: var(--green); line-height: 1.75; }
+
+  /* ── Main ── */
+  #main { padding: 30px 34px 90px; max-width: 920px; width: 100%; }
+
+  /* ── API Key Banner ── */
+  #api-banner {
+    background: rgba(245,200,66,0.07);
+    border: 1px solid rgba(245,200,66,0.25);
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  #api-banner.connected { background: rgba(6,214,160,0.07); border-color: rgba(6,214,160,0.25); }
+  #api-banner-text { flex: 1; min-width: 200px; }
+  #api-banner-text strong { display: block; font-size: 12px; color: var(--gold); margin-bottom: 3px; }
+  #api-banner.connected #api-banner-text strong { color: var(--green); }
+  #api-banner-text span { font-size: 11px; color: var(--muted2); }
+  #api-input { flex: 2; min-width: 240px; background: var(--s2); border: 1px solid rgba(245,200,66,0.3); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 9px 13px; border-radius: 3px; outline: none; }
+  #api-input:focus { border-color: var(--gold); }
+  #api-save-btn { padding: 9px 18px; background: linear-gradient(135deg, var(--gold), #d4a800); color: #0a0800; border: none; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+
+  /* ── Pages ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Typography ── */
+  .page-title { font-family: 'Bebas Neue', sans-serif; font-size: 38px; line-height: 1; letter-spacing: .02em; color: var(--text); }
+  .page-title span { color: var(--red); }
+  .page-desc { font-size: 12px; color: var(--muted2); line-height: 1.8; max-width: 560px; margin-top: 7px; margin-bottom: 28px; }
+  .sec-label { font-size: 8px; letter-spacing: .28em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .field-label { display: block; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+
+  /* ── Forms ── */
+  input, textarea, select {
+    background: var(--s2); border: 1px solid var(--border);
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; padding: 10px 13px; border-radius: 3px;
+    outline: none; width: 100%; transition: border-color .15s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--red); }
+  select option { background: #171726; }
+  textarea { resize: vertical; line-height: 1.65; }
+
+  /* ── Buttons ── */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 20px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: none; border-radius: 3px; white-space: nowrap; transition: opacity .15s; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-red { background: linear-gradient(135deg, var(--red), #c9184a); color: white; }
+  .btn-gold { background: linear-gradient(135deg, var(--gold), #d4a800); color: #0a0800; }
+  .btn-green { background: linear-gradient(135deg, var(--green), #04a87d); color: #001a0f; }
+  .btn-ghost { background: none; border: 1px solid var(--border2); color: var(--muted2); }
+  .btn-full { width: 100%; }
+
+  /* ── Cards ── */
+  .card { background: var(--surface); border: 1px solid var(--border); padding: 18px; border-radius: 3px; }
+
+  /* ── Tags ── */
+  .tag { display: inline-block; font-size: 8px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; margin-right: 4px; margin-bottom: 3px; }
+
+  /* ── Loader ── */
+  .loader { display: flex; align-items: center; gap: 12px; padding: 28px 0; }
+  .loader-bars { display: flex; gap: 3px; align-items: flex-end; height: 22px; }
+  .loader-bar { width: 3px; border-radius: 2px; animation: lbp 1s ease infinite; }
+  .loader-bar:nth-child(1) { background: var(--red); animation-delay: 0s; }
+  .loader-bar:nth-child(2) { background: var(--gold); animation-delay: .13s; }
+  .loader-bar:nth-child(3) { background: var(--green); animation-delay: .26s; }
+  .loader-bar:nth-child(4) { background: var(--purple); animation-delay: .39s; }
+  .loader-text { font-size: 12px; color: var(--muted2); }
+  @keyframes lbp { 0%,100% { height: 5px; opacity: .4; } 50% { height: 20px; opacity: 1; } }
+  @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(0.7); } }
+
+  /* ── Empty state ── */
+  .empty { text-align: center; padding: 56px 20px; border: 1px dashed rgba(255,255,255,0.08); border-radius: 3px; }
+  .empty-icon { font-size: 42px; opacity: 0.25; margin-bottom: 14px; }
+  .empty-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--muted); letter-spacing: .05em; margin-bottom: 6px; }
+  .empty-sub { font-size: 12px; color: var(--muted); max-width: 320px; margin: 0 auto; line-height: 1.8; }
+
+  /* ── Error ── */
+  .err-box { background: rgba(255,77,109,0.07); border: 1px solid rgba(255,77,109,0.35); border-radius: 3px; padding: 14px 18px; color: var(--red); font-size: 12px; line-height: 1.7; }
+
+  /* ── Info block ── */
+  .info-block { border-radius: 3px; padding: 10px 14px; margin-bottom: 12px; }
+  .info-block-label { font-size: 8px; letter-spacing: .15em; text-transform: uppercase; margin-bottom: 5px; }
+  .info-block-body { font-size: 12px; color: var(--muted2); line-height: 1.7; }
+
+  /* ── Grid helpers ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .span-2 { grid-column: 1 / -1; }
+
+  /* ── Trigger grid ── */
+  .trigger-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(134px, 1fr)); gap: 7px; margin-bottom: 22px; }
+  .trigger-btn { background: var(--s2); border: 1px solid var(--border); color: var(--muted2); padding: 11px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; display: flex; flex-direction: column; gap: 5px; text-align: left; border-radius: 3px; transition: all .14s; }
+  .trigger-btn .trig-ico { font-size: 18px; }
+  .trigger-btn.on { }
+
+  /* ── Result cards ── */
+  .result-card { background: var(--surface); border: 1px solid var(--border); padding: 18px; border-radius: 3px; margin-bottom: 12px; animation: cardIn .3s ease both; }
+  @keyframes cardIn { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+
+  .hook-quote { font-size: 16px; font-weight: 700; line-height: 1.4; margin: 10px 0 5px; color: var(--text); }
+  .hook-why { font-size: 10px; color: var(--muted); font-style: italic; margin-bottom: 14px; }
+  .hook-caption { font-size: 12px; line-height: 1.85; color: var(--muted2); border-top: 1px solid var(--border); padding-top: 12px; white-space: pre-line; }
+
+  .opening-hook { background: var(--s2); border-left: 3px solid var(--gold); padding: 10px 14px; margin-bottom: 12px; border-radius: 0 3px 3px 0; }
+  .opening-hook-label { font-size: 8px; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); margin-bottom: 5px; }
+  .opening-hook-text { font-size: 13px; font-weight: 600; line-height: 1.5; color: var(--text); font-style: italic; }
+
+  .viral-formula-box { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); border-radius: 3px; padding: 14px 18px; margin-bottom: 22px; }
+  .viral-formula-label { font-size: 8px; letter-spacing: .2em; text-transform: uppercase; color: var(--purple); margin-bottom: 7px; }
+  .viral-formula-text { font-size: 14px; font-weight: 700; line-height: 1.5; color: var(--text); }
+
+  .why-viral-box { background: rgba(6,214,160,0.07); border: 1px solid rgba(6,214,160,0.2); border-radius: 3px; padding: 9px 13px; margin-bottom: 13px; }
+  .why-viral-label { font-size: 8px; letter-spacing: .15em; text-transform: uppercase; color: var(--green); margin-bottom: 4px; }
+  .why-viral-text { font-size: 11px; color: var(--muted2); line-height: 1.65; }
+
+  /* ── Copy btn ── */
+  .copy-btn { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); cursor: pointer; padding: 5px 11px; border: 1px solid var(--border); background: none; border-radius: 2px; font-family: 'DM Sans', sans-serif; transition: all .16s; }
+  .copy-btn:hover { color: var(--text); border-color: var(--border2); }
+  .copy-btn.copied { color: var(--green); border-color: rgba(6,214,160,0.35); }
+
+  /* ── Script table ── */
+  .scene-row { display: grid; grid-template-columns: 72px 1fr 1fr; margin-bottom: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+  .scene-ts { background: var(--s2); padding: 14px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid var(--border); }
+  .scene-ts-time { font-family: 'Bebas Neue', sans-serif; font-size: 11px; color: var(--red); text-align: center; line-height: 1.3; }
+  .scene-ts-emotion { font-size: 7px; color: var(--muted); text-align: center; margin-top: 5px; letter-spacing: .08em; text-transform: uppercase; line-height: 1.4; }
+  .scene-say { padding: 14px; border-right: 1px solid var(--border); }
+  .scene-show { padding: 14px; }
+  .scene-col-label { font-size: 8px; letter-spacing: .15em; text-transform: uppercase; margin-bottom: 6px; }
+  .scene-say-text { font-size: 12px; line-height: 1.65; color: var(--text); font-style: italic; }
+  .scene-show-text { font-size: 12px; line-height: 1.65; color: var(--muted2); }
+
+  /* ── Calendar ── */
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 18px; }
+  .cal-day { background: var(--surface); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; min-height: 90px; }
+  .cal-day-header { padding: 6px 7px; background: var(--s2); border-bottom: 1px solid var(--border); font-size: 8px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+  .cal-day-body { padding: 5px; display: flex; flex-direction: column; gap: 3px; }
+  .cal-chip { font-size: 8px; line-height: 1.4; padding: 3px 5px; border-radius: 2px; border-left-width: 2px; border-left-style: solid; }
+
+  .cal-detail { display: grid; grid-template-columns: 65px 1fr; gap: 14px; align-items: start; margin-bottom: 8px; }
+  .cal-detail-time { text-align: center; }
+  .cal-detail-time-val { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--gold); line-height: 1; }
+  .cal-detail-time-day { font-size: 8px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; margin-top: 3px; }
+  .cal-detail-idea { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .cal-detail-hook { font-size: 11px; color: var(--gold); margin-bottom: 4px; font-style: italic; }
+  .cal-detail-tip { font-size: 11px; color: var(--muted2); }
+
+  /* ── Checklist ── */
+  .ck-item { background: var(--surface); border: 1px solid var(--border); padding: 13px 15px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; border-radius: 3px; margin-bottom: 7px; transition: all .15s; }
+  .ck-item.done { opacity: 0.48; border-color: rgba(6,214,160,0.3); }
+  .ck-box { width: 18px; height: 18px; border: 2px solid var(--border2); border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: none; margin-top: 1px; transition: all .15s; }
+  .ck-box.checked { background: var(--green); border-color: var(--green); }
+  .ck-check { color: #001a0f; font-size: 10px; font-weight: 900; display: none; }
+  .ck-box.checked .ck-check { display: block; }
+  .ck-title { font-size: 12px; font-weight: 600; margin-bottom: 3px; color: var(--text); }
+  .ck-desc { font-size: 11px; color: var(--muted2); line-height: 1.65; }
+  .ck-tip { font-size: 10px; color: var(--gold); margin-top: 5px; font-style: italic; }
+  .progress-bar-wrap { height: 4px; background: var(--s2); border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--gold)); border-radius: 3px; transition: width .4s ease; }
+  .progress-label { font-size: 9px; color: var(--muted); margin-bottom: 18px; }
+
+  /* ── Platform tabs ── */
+  .plat-tabs { display: flex; gap: 5px; margin-bottom: 20px; }
+  .plat-tab { padding: 7px 16px; font-size: 11px; font-weight: 600; letter-spacing: .04em; cursor: pointer; border-radius: 3px; font-family: 'DM Sans', sans-serif; transition: all .14s; background: none; }
+
+  /* ── Money map ── */
+  .money-timeline { position: relative; padding-left: 28px; }
+  .money-line { position: absolute; left: 8px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(to bottom, var(--red), var(--gold), var(--green)); }
+  .money-phase { margin-bottom: 34px; position: relative; }
+  .money-dot { position: absolute; left: -24px; top: 6px; width: 12px; height: 12px; border-radius: 50%; }
+  .money-phase-label { font-size: 8px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+  .money-phase-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .02em; margin-bottom: 9px; color: var(--text); }
+  .money-phase-desc { font-size: 12px; color: var(--muted2); line-height: 1.8; margin-bottom: 14px; max-width: 680px; }
+  .money-items { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .money-item { background: var(--surface); border: 1px solid var(--border); padding: 12px 14px; border-radius: 3px; }
+  .money-item-name { font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+  .money-item-desc { font-size: 11px; color: var(--muted2); line-height: 1.65; margin-bottom: 5px; }
+  .money-item-earn { font-size: 9px; color: var(--gold); font-weight: 700; }
+  .money-truth { background: rgba(6,214,160,0.07); border: 1px solid rgba(6,214,160,0.22); padding: 16px 20px; margin-top: 10px; border-radius: 3px; }
+  .money-truth-label { font-size: 8px; letter-spacing: .22em; text-transform: uppercase; color: var(--green); margin-bottom: 10px; }
+  .money-truth p { font-size: 12px; line-height: 1.85; color: var(--muted2); margin-bottom: 8px; }
+
+  /* ── Modal ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(12px); }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: var(--surface); border: 1px solid var(--border2); max-width: 580px; width: 100%; padding: 30px; position: relative; border-radius: 4px; max-height: 92vh; overflow-y: auto; animation: mIn .22s ease; }
+  @keyframes mIn { from { opacity:0; transform: scale(.95) translateY(10px); } to { opacity:1; transform: scale(1) translateY(0); } }
+  .modal-close { position: absolute; top: 14px; right: 14px; background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; line-height: 1; padding: 2px; }
+  .modal-tag { font-size: 8px; letter-spacing: .22em; text-transform: uppercase; color: var(--red); margin-bottom: 8px; }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; line-height: 1.2; margin-bottom: 18px; padding-right: 28px; }
+
+  /* ── Studio ── */
+  .studio-grid { display: grid; grid-template-columns: 280px 1fr; gap: 22px; align-items: start; }
+  .studio-controls { display: flex; flex-direction: column; gap: 12px; }
+  .studio-preview { position: sticky; top: 20px; }
+  .canvas-wrap { position: relative; }
+  canvas { width: 100%; aspect-ratio: 9/16; border: 1px solid var(--border2); border-radius: 4px; display: block; box-shadow: 0 24px 70px rgba(0,0,0,.65); }
+  .theme-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 5px; }
+  .theme-swatch { height: 44px; cursor: pointer; border: 2px solid transparent; border-radius: 4px; position: relative; overflow: hidden; transition: all .17s; }
+  .theme-swatch.active { border-color: rgba(255,255,255,.7); }
+  .theme-name { position: absolute; bottom: 0; left: 0; right: 0; font-size: 7.5px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.75); text-align: center; padding: 3px; background: rgba(0,0,0,.36); }
+  .anim-btns { display: flex; gap: 5px; flex-wrap: wrap; }
+  .anim-btn { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--border); background: none; color: var(--muted2); cursor: pointer; border-radius: 2px; font-family: 'DM Sans', sans-serif; transition: all .15s; }
+  .anim-btn.active { border-color: var(--red); background: rgba(255,77,109,0.12); color: var(--red); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    #app { grid-template-columns: 1fr; }
+    #sidebar { position: relative; height: auto; flex-direction: row; flex-wrap: wrap; padding: 12px; gap: 6px; }
+    .sidebar-logo { border: none; margin: 0; padding: 0; }
+    .nav-group { padding: 0; }
+    .nav-group-label { display: none; }
+    .nav-btn { padding: 7px 10px; font-size: 11px; }
+    .sidebar-footer { display: none; }
+    #main { padding: 20px 16px 60px; }
+    .studio-grid { grid-template-columns: 1fr; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .span-2 { grid-column: auto; }
+    .money-items { grid-template-columns: 1fr; }
+    .cal-grid { grid-template-columns: repeat(4,1fr); }
+    .scene-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      <h1>CreatorOS</h1>
+      <p>Built for Nigerian creators</p>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Create</div>
+      <button class="nav-btn active" data-page="viral"><span class="ico">🧬</span>Viral DNA</button>
+      <button class="nav-btn" data-page="hooks"><span class="ico">🎣</span>Hook Writer</button>
+      <button class="nav-btn" data-page="script"><span class="ico">📝</span>Script Writer</button>
+      <button class="nav-btn" data-page="studio"><span class="ico">🎬</span>Video Studio</button>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Build</div>
+      <button class="nav-btn" data-page="calendar"><span class="ico">📅</span>Calendar</button>
+      <button class="nav-btn" data-page="checklist"><span class="ico">✅</span>Profile Setup</button>
+      <button class="nav-btn" data-page="money"><span class="ico">💰</span>Money Map</button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-badge">🇳🇬 Every insight tuned for the Nigerian market — not New York.</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main id="main">
+
+    <!-- API KEY BANNER -->
+    <div id="api-banner">
+      <div id="api-banner-text">
+        <strong>🔑 Paste your Google Gemini API Key</strong>
+        <span>Get a free key at aistudio.google.com — no credit card needed</span>
+      </div>
+      <input type="password" id="api-input" placeholder="Paste your Gemini API key here…" />
+      <button id="api-save-btn" class="btn btn-gold">Connect →</button>
+    </div>
+
+    <!-- ══ PAGE: VIRAL DNA ══ -->
+    <section class="page active" id="page-viral">
+      <div class="page-title">Viral <span>DNA</span></div>
+      <div class="page-desc">Choose the emotions you want to weaponise. The engine builds ideas around what actually makes people feel something — not what sounds good in a strategy deck.</div>
+
+      <div class="sec-label">Your emotional weapons — pick 1 to 4</div>
+      <div class="trigger-grid" id="trigger-grid"></div>
+
+      <div class="grid-2" style="margin-bottom:22px; align-items:flex-end;">
+        <div class="span-2">
+          <label class="field-label">Your creator angle (optional — makes ideas sharper)</label>
+          <input type="text" id="viral-profile" placeholder="e.g. 26yr Abuja girl, dry humour, talks about dating Nigerian men & corporate life, no face cam" />
+        </div>
+        <div>
+          <label class="field-label">Platform</label>
+          <select id="viral-platform">
+            <option value="TikTok">TikTok</option>
+            <option value="Instagram Reels">Instagram Reels</option>
+            <option value="YouTube Shorts">YouTube Shorts</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:flex-end;">
+          <button class="btn btn-red btn-full" id="viral-btn">Generate →</button>
+        </div>
+      </div>
+
+      <div id="viral-loading" class="loader" style="display:none;">
+        <div class="loader-bars"><div class="loader-bar"></div><div class="loader-bar"></div><div class="loader-bar"></div><div class="loader-bar"></div></div>
+        <span class="loader-text">Mixing your emotional cocktail and building viral ideas…</span>
+      </div>
+      <div id="viral-error" class="err-box" style="display:none;"></div>
+      <div id="viral-empty" class="empty">
+        <div class="empty-icon">🧬</div>
+        <div class="empty-title">Select Your Triggers</div>
+        <div class="empty-sub">The more specific your emotional mix, the sharper and more original the ideas.</div>
+      </div>
+      <div id="viral-results" style="display:none;"></div>
+    </section>
+
+    <!-- ══ PAGE: HOOKS ══ -->
+    <section class="page" id="page-hooks">
+      <div class="page-title">Hook <span>&</span> Caption</div>
+      <div class="page-desc">Your first 3 seconds decide everything. These hooks are built on psychology — specific, charged, and human.</div>
+
+      <div class="grid-2" style="margin-bottom:18px;">
+        <div class="span-2">
+          <label class="field-label">Your content idea</label>
+          <input type="text" id="hooks-idea" placeholder="e.g. I quit my bank job to sell shawarma. Here's what happened in 60 days." />
+        </div>
+        <div>
+          <label class="field-label">Platform</label>
+          <select id="hooks-platform">
+            <option value="TikTok">TikTok</option>
+            <option value="Instagram Reels">Instagram Reels</option>
+            <option value="YouTube Shorts">YouTube Shorts</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Tone</label>
+          <select id="hooks-tone">
+            <option value="Dramatic & Tense">Dramatic & Tense</option>
+            <option value="Relatable & Real">Relatable & Real</option>
+            <option value="Funny & Chaotic">Funny & Chaotic</option>
+            <option value="Motivational & Hype">Motivational & Hype</option>
+            <option value="Controversial & Bold">Controversial & Bold</option>
+            <option value="Deep & Emotional">Deep & Emotional</option>
+          </select>
+        </div>
+        <div class="span-2">
+          <button class="btn btn-red btn-full" id="hooks-btn">Generate 5 Hooks & Captions →</button>
+        </div>
+      </div>
+
+      <div id="hooks-loading" class="loader" style="display:none;">
+        <div class="loader-bars"><div class="loader-bar"></div><div class="loader-bar"></div><div class="loader-bar"></div><div class="loader-bar"></div></div>
+        <span class="loader-text">Building psychological hooks…</span>
+      </div>
+      <div id="hooks-error" class="err-box" style="display:none;"></div>
+      <div id="hooks-empty" class="empty">
+        <div class="empty-icon">🎣</div>
+        <div class="empty-title">No Hooks Yet</div>
+        <div class="empty-sub">Describe your content idea and get 5 scroll-stopping hooks + captions.</div>
+      </div>
+      <div id="hooks-results" style="display:none;"></div>
+    </section>
+
+    <!-- ══ PAGE: SCRIPT ══ -->
+    <section class="page" id="page-script">
+      <div class="page-title">Script <span>Writer</span></div>
+      <div class="page-desc">Word-for-word scripts. Know exactly what to say, what to show, and what emotion to hit at every second of your video.</div>
+
+      <div class="grid-3" style="margin-bottom:18px;">
+        <div class="span-2" style="grid-column:1/-1;">
+          <label class="field-label">What is this video about?</label>
+          <textarea id="script-topic" rows="2" placeholder="e.g. A girl who moved from Enugu to Lagos chasing a job offer that turned out to be fake — and what happened next changed her life"></textarea>
+        </div>
+        <div>
+          <label class="field-label">Duration</label>
+          <select id="script-duration">
+            <option value="30">30 seconds</option>
+            <option value="60" selected>60 seconds</option>
+            <option value="90">90 seconds</option>
+            <option value="180">3 minutes</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Style</label>
+          <select id="script-style">
+            <option value="Storytime">Storytime</option>
+            <option value="POV / First Person">POV / First Person</option>
+            <option value="Skit / Comedy">Skit / Comedy</option>
+            <option value="List / Tips">List / Tips</option>
+            <option value="Rant / Hot Take">Rant / Hot Take</option>
+            <option value="Reaction / Commentary">Reaction / Commentary</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:flex-end;">
+          <button class="btn btn-gold btn-full" id="script-btn">Write My Script →</button>
+        </div>
+      </div>
+
+      <div id="script-loading" class="loader" style="display:none;">
+        <div class="loader-bars"><div class="loader-bar"></div><div class="loader-bar"></div><div class="loader-bar"></div><div class="loader-bar"></div></div>
+        <span class="loader-text">Writing your word-for-word script…</span>
+      </div>
+      <div id="script-error" class="err-box" style="display:none;"></div>
+      <div id="script-empty" class="empty">
+        <div class="empty-icon">📝</div>
+        <div class="empty-title">No Script Yet</div>
+        <div class="empty-sub">Describe your video idea and get a complete scene-by-scene script ready to film.</div>
+      </div>
+      <div id="script-results" style="display:none;"></div>
+    </section>
+
+    <!-- ══ PAGE: CALENDAR ══ -->
+    <section class="page" id="page-calendar">
+      <div class="page-title">Content <span>Calendar</span></div>
+      <div class="page-desc">A full week of emotionally-charged, immediately filmable ideas. Not vague themes — specific videos with hooks ready to go.</div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:22px;">
+        <div>
+          <label class="field-label">Niche</label>
+          <select id="cal-niche" style="min-width:170px;width:auto;">
+            <option value="lifestyle">Lifestyle</option>
+            <option value="finance & hustle">Finance & Hustle</option>
+            <option value="entertainment & gossip">Entertainment & Gossip</option>
+            <option value="relationships & dating">Relationships & Dating</option>
+            <option value="comedy & skits">Comedy & Skits</option>
+            <option value="music & Afrobeats">Music & Afrobeats</option>
+            <option value="football & sports">Football & Sports</option>
+            <option value="Nigerian culture">Nigerian Culture</option>
+            <option value="health & wellness">Health & Wellness</option>
+            <option value="motivation & mindset">Motivation & Mindset</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Growth Stage</label>
+          <select id="cal-stage" style="min-width:160px;width:auto;">
+            <option value="starting out (0–3 months)">Starting Out (0–3 mo)</option>
+            <option value="growing (3–6 months)">Growing (3–6 mo)</option>
+            <option value="scaling (6+ months)">Scaling (6+ mo)</option>
+          </select>
+        </div>
+        <button class="btn btn-red" id="cal-btn">Build My Week →</button>
+      </div>
+
+      <div id="cal-loading" class="loader" style="display:none;">
+        <div class="loader-bars"><div class="loader-bar"></div><div class="loader-bar"></div><div class="loader-bar"></div><div class="loader-bar"></div></div>
+        <span class="loader-text">Building your emotionally-charged week…</span>
+      </div>
+      <div id="cal-error" class="err-box" style="display:none;"></div>
+      <div id="cal-empty" class="empty">
+        <div class="empty-icon">📅</div>
+        <div class="empty-title">No Schedule Yet</div>
+        <div class="empty-sub">Pick your niche and stage then generate your full week.</div>
+      </div>
+      <div id="cal-results" style="display:none;"></div>
+    </section>
+
+    <!-- ══ PAGE: CHECKLIST ══ -->
+    <section class="page" id="page-checklist">
+      <div class="page-title">Profile <span>Setup</span></div>
+      <div class="page-desc">Your profile is the first thing a potential follower judges. Don't start posting seriously until this is complete.</div>
+      <div class="plat-tabs" id="ck-tabs">
+        <button class="plat-tab active" data-plat="tiktok" style="border:1px solid #ff2d55;color:#ff2d55;background:rgba(255,45,85,0.1);">TikTok</button>
+        <button class="plat-tab" data-plat="instagram" style="border:1px solid var(--border);color:var(--muted2);">Instagram</button>
+        <button class="plat-tab" data-plat="youtube" style="border:1px solid var(--border);color:var(--muted2);">YouTube</button>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="ck-progress" style="width:0%"></div></div>
+      <div class="progress-label" id="ck-progress-label">0 of 8 done · 0%</div>
+      <div id="ck-list"></div>
+    </section>
+
+    <!-- ══ PAGE: MONEY MAP ══ -->
+    <section class="page" id="page-money">
+      <div class="page-title">Money <span>Map</span></div>
+      <div class="page-desc">Your Nigeria-specific path from zero to real, stacked income. No Western playbook. What actually works here.</div>
+      <div class="money-timeline">
+        <div class="money-line"></div>
+        <div id="money-phases"></div>
+      </div>
+      <div class="money-truth">
+        <div class="money-truth-label">⚡ The Honest Truth</div>
+        <p>TikTok Creator Rewards <strong style="color:var(--text)">does not pay Nigerian creators</strong>. Use TikTok as a growth engine. Use YouTube as your income engine.</p>
+        <p><strong style="color:var(--text)">YouTube is your most reliable long-term income</strong> in Nigeria. Start the clock the moment you start posting anywhere.</p>
+        <p>The creators making serious money <strong style="color:var(--text)">stack all four streams simultaneously</strong>. Build toward all four from the beginning.</p>
+      </div>
+    </section>
+
+    <!-- ══ PAGE: STUDIO ══ -->
+    <section class="page" id="page-studio">
+      <div class="page-title">Video <span>Studio</span></div>
+      <div class="page-desc">Type your headline, pick a theme and animation — your card renders live. Download as PNG or record a real video file.</div>
+
+      <!-- Status bar -->
+      <div id="studio-status" style="display:none;background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.3);border-radius:3px;padding:10px 16px;margin-bottom:16px;font-size:12px;color:#06d6a0;display:flex;align-items:center;gap:10px;">
+        <span id="studio-status-dot" style="width:8px;height:8px;border-radius:50%;background:#06d6a0;display:inline-block;animation:pulse 1.2s ease infinite;"></span>
+        <span id="studio-status-text">Canvas rendering live…</span>
+      </div>
+
+      <!-- AI loading bar -->
+      <div id="studio-ai-status" style="display:none;background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.3);border-radius:3px;padding:12px 16px;margin-bottom:16px;">
+        <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#ff4d6d;margin-bottom:8px;">✦ AI is writing your visual text…</div>
+        <div style="height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
+          <div id="studio-ai-bar" style="height:100%;background:linear-gradient(90deg,#ff4d6d,#f5c842);border-radius:2px;width:0%;transition:width 0.3s ease;"></div>
+        </div>
+      </div>
+
+      <!-- Video recording status -->
+      <div id="studio-rec-status" style="display:none;background:rgba(255,77,109,0.12);border:1px solid #ff4d6d;border-radius:3px;padding:12px 16px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <span style="width:10px;height:10px;border-radius:50%;background:#ff4d6d;display:inline-block;animation:pulse 0.8s ease infinite;"></span>
+          <span style="font-size:12px;font-weight:700;color:#ff4d6d;" id="studio-rec-label">● Recording video… 0s / 6s</span>
+        </div>
+        <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
+          <div id="studio-rec-bar" style="height:100%;background:#ff4d6d;border-radius:2px;width:0%;transition:width 0.1s linear;"></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted2);margin-top:6px;">Capturing 6 seconds of animation at 30fps → MP4-compatible WebM video</div>
+      </div>
+
+      <div class="studio-grid">
+        <div class="studio-controls">
+          <div class="sec-label">Content</div>
+          <div>
+            <label class="field-label">Headline</label>
+            <textarea id="vc-text" rows="2" placeholder="The Lagos hustle nobody talks about…"></textarea>
+          </div>
+          <div>
+            <label class="field-label">Subtext / Episode</label>
+            <input type="text" id="vc-sub" placeholder="Part 1 of 5" />
+          </div>
+          <div>
+            <label class="field-label">Handle</label>
+            <input type="text" id="vc-handle" placeholder="@yourhandle" />
+          </div>
+          <div class="sec-label" style="margin-top:4px;">Theme</div>
+          <div class="theme-grid" id="theme-grid"></div>
+          <div class="sec-label" style="margin-top:8px;">Animation</div>
+          <div class="anim-btns" id="anim-btns"></div>
+
+          <div class="sec-label" style="margin-top:8px;">✦ AI Generate Text</div>
+          <textarea id="vc-ai-prompt" rows="2" placeholder="e.g. A girl who moved to Lagos for love and lost everything but found herself"></textarea>
+          <button class="btn btn-red btn-full" id="vc-ai-btn">✦ Generate Visual Text</button>
+
+          <div class="sec-label" style="margin-top:12px;">Export</div>
+          <button class="btn btn-green btn-full" id="vc-dl-video">⬇ Download Video (WebM)</button>
+          <button class="btn btn-ghost btn-full" id="vc-dl-btn" style="margin-top:5px;">⬇ Download PNG (Still)</button>
+          <button class="btn btn-ghost btn-full" id="vc-guide-btn" style="margin-top:5px;">📲 How to Post</button>
+        </div>
+
+        <div class="studio-preview">
+          <div style="font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+            <span>Live Preview · 9:16 Portrait</span>
+            <span id="studio-live-badge" style="background:rgba(6,214,160,.15);color:var(--green);border:1px solid rgba(6,214,160,.3);padding:2px 10px;border-radius:10px;font-size:8px;letter-spacing:.1em;">● LIVE</span>
+          </div>
+          <canvas id="studio-canvas" width="450" height="800" style="width:100%;aspect-ratio:9/16;border:1px solid var(--border2);border-radius:4px;display:block;box-shadow:0 24px 70px rgba(0,0,0,.65);background:#04030d;"></canvas>
+          <div style="font-size:9px;color:var(--muted);text-align:center;margin-top:8px;">The preview animates live. Download Video captures 6 seconds as a real video file.</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <button class="modal-close" id="modal-close">✕</button>
+    <div class="modal-tag" id="modal-tag"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   GEMINI API
+════════════════════════════════════════════════════ */
+let GEMINI_KEY = '';
+
+async function gemini(prompt, maxTokens = 2000) {
+  if (!GEMINI_KEY) throw new Error('No API key set. Paste your Gemini key in the banner above.');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { maxOutputTokens: maxTokens, temperature: 0.9 }
+  };
+  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) {
+    const t = await res.text();
+    if (res.status === 429) throw new Error('Rate limit hit — wait 30 seconds and try again. Gemini free tier allows 15 requests/minute.');
+    if (res.status === 400) throw new Error('Invalid API key. Check your key at aistudio.google.com and try again.');
+    throw new Error(`Gemini API error ${res.status}: ${t.slice(0,150)}`);
+  }
+  const data = await res.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Empty response from Gemini. Try again.');
+  return text;
+}
+
+function parseJSON(raw) {
+  const cleaned = raw.replace(/```json/gi,'').replace(/```/g,'').trim();
+  const s = cleaned.search(/[{[]/);
+  const e = Math.max(cleaned.lastIndexOf('}'), cleaned.lastIndexOf(']'));
+  if (s === -1 || e === -1) throw new Error('Could not parse response. Try again.');
+  return JSON.parse(cleaned.slice(s, e+1));
+}
+
+/* ════════════════════════════════════════════════════
+   THE BRAIN — Master prompt injected into every call
+════════════════════════════════════════════════════ */
+const BRAIN = `You are the world's sharpest viral content strategist. You have absorbed every viral video, every trending format, every psychological study on why people stop scrolling, watch to the end, share, comment, and follow.
+
+You know content goes viral because it triggers primal human drives:
+• DRAMA & CONFLICT — tension, betrayal, confrontation, cliffhangers, "wait for it"
+• LOVE & BELONGING — romance, heartbreak, family, friendship, "us vs them" community
+• MONEY & STATUS — wealth, hustle, underdog success, flexing, "how I really made it"
+• ENTERTAINMENT & FUN — unexpected twists, absurdity, joy, chaos, comedic timing
+• REWARD & DOPAMINE — satisfying reveals, transformations, countdowns, "satisfying" formats
+• IDENTITY & PRIDE — nation, tribe, religion, football club, "only Lagos people understand"
+• FEAR & OUTRAGE — injustice, danger, things people hate, "you won't believe this"
+• CURIOSITY — forbidden knowledge, behind-the-scenes, secrets, "nobody talks about this"
+• SEX APPEAL & DESIRE — attraction, aspiration, confidence, body, unspoken tension
+• NOSTALGIA — childhood memories, throwbacks, "90s kids will remember", cultural moments
+• GOSSIP & CELEBRITY — who's doing what, drama in public life, opinions on famous people
+
+You know the Nigerian internet deeply: Afrobeats culture, Premier League obsession, AFCON fire, Nollywood drama, Lagos hustle, NEPA frustration, japa conversations, sapa, campus life, market slang, Pidgin English, the way Nigerians drag people on Twitter/X, the emotional texture of Lagos at 2am.
+
+Every idea you give is specific, emotionally charged, immediately filmable.
+NEVER give vague ideas. "Lifestyle content" is not an idea. "POV: third month in Lagos and I still can't afford the rent I moved here for" is an idea.
+Return ONLY valid JSON. No markdown. No explanation. Pure JSON object.`;
+
+/* ════════════════════════════════════════════════════
+   API KEY MANAGEMENT
+════════════════════════════════════════════════════ */
+const apiInput = document.getElementById('api-input');
+const apiSaveBtn = document.getElementById('api-save-btn');
+const apiBanner = document.getElementById('api-banner');
+const apiBannerText = document.getElementById('api-banner-text');
+
+// Load saved key
+const saved = sessionStorage.getItem('cos_gemini_key');
+if (saved) { GEMINI_KEY = saved; setConnected(); }
+
+apiSaveBtn.addEventListener('click', () => {
+  const k = apiInput.value.trim();
+  if (!k) return;
+  GEMINI_KEY = k;
+  sessionStorage.setItem('cos_gemini_key', k);
+  setConnected();
+});
+
+function setConnected() {
+  apiBanner.classList.add('connected');
+  apiBannerText.innerHTML = '<strong>✅ Gemini Connected — No limits. No restrictions.</strong><span>Your key is stored in this browser session only.</span>';
+  apiInput.style.display = 'none';
+  apiSaveBtn.style.display = 'none';
+}
+
+/* ════════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════════ */
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-' + btn.dataset.page).classList.add('active');
+  });
+});
+
+/* ════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════ */
+function showLoader(id) {
+  hide(id+'-empty'); hide(id+'-error'); hide(id+'-results');
+  show(id+'-loading');
+}
+function showResults(id) { hide(id+'-loading'); hide(id+'-empty'); show(id+'-results'); }
+function showError(id, msg) {
+  hide(id+'-loading');
+  const el = document.getElementById(id+'-error');
+  el.textContent = '⚠ ' + msg;
+  el.style.display = 'block';
+}
+function show(id) { const el = document.getElementById(id); if(el) el.style.display = 'block'; }
+function hide(id) { const el = document.getElementById(id); if(el) el.style.display = 'none'; }
+
+function escapeHTML(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatText(value) {
+  return escapeHTML(value).replace(/\n/g, '<br>');
+}
+
+function tag(text, color) {
+  return `<span class="tag" style="background:${color}20;color:${color};border:1px solid ${color}35;">${escapeHTML(text)}</span>`;
+}
+
+function infoBlock(label, color, content) {
+  return `<div class="info-block" style="background:${color}09;border:1px solid ${color}22;">
+    <div class="info-block-label" style="color:${color};">${escapeHTML(label)}</div>
+    <div class="info-block-body">${content}</div>
+  </div>`;
+}
+
+function copyBtn(text, label='Copy') {
+  const id = 'cb-' + Math.random().toString(36).slice(2);
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('click', () => {
+      navigator.clipboard.writeText(text).then(() => {
+        el.textContent = '✓ Copied'; el.classList.add('copied');
+        setTimeout(() => { el.textContent = label; el.classList.remove('copied'); }, 2000);
+      });
+    });
+  }, 100);
+  return `<button id="${id}" class="copy-btn">${label}</button>`;
+}
+
+function openModal(tag, title, bodyHTML) {
+  document.getElementById('modal-tag').textContent = tag;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  document.getElementById('modal').classList.add('open');
+}
+
+document.getElementById('modal-close').addEventListener('click', () => document.getElementById('modal').classList.remove('open'));
+document.getElementById('modal').addEventListener('click', e => { if(e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') document.getElementById('modal').classList.remove('open'); });
+
+/* ════════════════════════════════════════════════════
+   VIRAL DNA
+════════════════════════════════════════════════════ */
+const TRIGGERS = [
+  { id:'drama',     ico:'🎭', label:'Drama & Conflict',     color:'#ff4d6d' },
+  { id:'money',     ico:'💰', label:'Money & Status',       color:'#f5c842' },
+  { id:'love',      ico:'❤️',  label:'Love & Heartbreak',    color:'#fb7185' },
+  { id:'football',  ico:'⚽', label:'Football & Sports',    color:'#06d6a0' },
+  { id:'comedy',    ico:'😂', label:'Comedy & Chaos',       color:'#ff7c43' },
+  { id:'gossip',    ico:'👀', label:'Gossip & Celebrities', color:'#f97316' },
+  { id:'hustle',    ico:'🔥', label:'Hustle & Success',     color:'#fb923c' },
+  { id:'music',     ico:'🎵', label:'Music & Afrobeats',    color:'#a78bfa' },
+  { id:'curiosity', ico:'🤫', label:'Secrets & Curiosity',  color:'#67e8f9' },
+  { id:'identity',  ico:'🇳🇬', label:'Nigerian Culture',     color:'#06d6a0' },
+  { id:'reward',    ico:'✨', label:'Satisfaction & Reward', color:'#f5c842' },
+  { id:'desire',    ico:'💋', label:'Attraction & Desire',  color:'#fb7185' },
+];
+
+let selectedTriggers = [];
+const tGrid = document.getElementById('trigger-grid');
+TRIGGERS.forEach(t => {
+  const btn = document.createElement('button');
+  btn.className = 'trigger-btn';
+  btn.dataset.id = t.id;
+  btn.innerHTML = `<span class="trig-ico">${t.ico}</span>${t.label}`;
+  btn.addEventListener('click', () => {
+    const on = selectedTriggers.includes(t.id);
+    if (on) {
+      selectedTriggers = selectedTriggers.filter(x => x !== t.id);
+      btn.classList.remove('on');
+      btn.style.background = 'var(--s2)';
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color = 'var(--muted2)';
+    } else {
+      if (selectedTriggers.length >= 4) return;
+      selectedTriggers.push(t.id);
+      btn.classList.add('on');
+      btn.style.background = t.color + '18';
+      btn.style.borderColor = t.color;
+      btn.style.color = t.color;
+    }
+  });
+  tGrid.appendChild(btn);
+});
+
+document.getElementById('viral-btn').addEventListener('click', async () => {
+  if (!selectedTriggers.length) return;
+  const labels = selectedTriggers.map(id => TRIGGERS.find(t=>t.id===id)?.label).join(', ');
+  const profile = document.getElementById('viral-profile').value;
+  const platform = document.getElementById('viral-platform').value;
+
+  showLoader('viral');
+  document.getElementById('viral-btn').disabled = true;
+
+  try {
+    const raw = await gemini(`${BRAIN}
+
+Generate 5 viral content ideas.
+Platform: ${platform}
+Emotional triggers to combine: ${labels}
+Creator: ${profile || 'Nigerian creator in Lagos, wants to grow fast and monetise'}
+
+Each idea must be specific enough to film TODAY. No vague concepts. Use Nigerian cultural texture. Think about what would make someone tag a friend, rewatch 3 times, or screenshot the caption.
+
+Return this exact JSON:
+{
+  "viral_formula": "One sentence describing the emotional cocktail powering these ideas",
+  "ideas": [
+    {
+      "title": "Punchy video title under 10 words",
+      "trigger": "Primary emotion being activated",
+      "format": "POV / Storytime / Skit / Reaction / List / Challenge / Day-in-life / Hot-take",
+      "hook": "The EXACT first sentence or visual to open with — irresistible and specific",
+      "premise": "What actually happens in this video — 2 specific sentences",
+      "why_viral": "The precise psychological reason this spreads",
+      "cta": "Exact words to say at the end to drive follows/comments",
+      "best_time": "Optimal posting time for ${platform}"
+    }
+  ]
+}`, 2000);
+
+    const data = parseJSON(raw);
+    const el = document.getElementById('viral-results');
+    el.innerHTML = '';
+
+    // Formula box
+    el.innerHTML += `<div class="viral-formula-box">
+      <div class="viral-formula-label">⚡ Your Viral Formula</div>
+      <div class="viral-formula-text">${escapeHTML(data.viral_formula || '')}</div>
+    </div>`;
+
+    (data.ideas || []).forEach((idea, i) => {
+      const platColor = {TikTok:'#ff4d6d','Instagram Reels':'#e1306c','YouTube Shorts':'#ff0000'}[platform]||'#a78bfa';
+      const cardId = 'idea-' + i;
+      el.innerHTML += `
+        <div class="result-card" style="animation-delay:${i*0.07}s">
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#ff4d6d;line-height:1;flex-shrink:0;">0${i+1}</div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:700;margin-bottom:7px;color:var(--text);">${escapeHTML(idea.title)}</div>
+              <div>${tag(idea.trigger,'#ff4d6d')}${tag(idea.format,'#f5c842')}${tag(platform,platColor)}${tag('🕐 '+idea.best_time,'rgba(242,237,228,0.4)')}</div>
+            </div>
+          </div>
+          <div class="opening-hook">
+            <div class="opening-hook-label">Opening Hook</div>
+            <div class="opening-hook-text">"${escapeHTML(idea.hook)}"</div>
+          </div>
+          <div style="font-size:12px;line-height:1.75;color:var(--muted2);margin-bottom:10px;">${escapeHTML(idea.premise)}</div>
+          <div class="why-viral-box">
+            <div class="why-viral-label">Why This Goes Viral</div>
+            <div class="why-viral-text">${escapeHTML(idea.why_viral)}</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+            ${copyBtn(`${idea.hook}\n\n${idea.premise}`, 'Copy Idea')}
+            <button class="btn btn-red" style="font-size:11px;padding:7px 16px;" data-brief="${i}">Full Production Brief →</button>
+          </div>
+        </div>`;
+
+      // Store idea for brief generation
+      setTimeout(() => {
+        const briefBtns = document.querySelectorAll('[data-brief]');
+        briefBtns.forEach(b => {
+          b.onclick = () => generateBrief(data.ideas[parseInt(b.dataset.brief)], platform, profile);
+        });
+      }, 200);
+    });
+
+    showResults('viral');
+  } catch(e) {
+    showError('viral', e.message);
+  }
+  document.getElementById('viral-btn').disabled = false;
+});
+
+async function generateBrief(idea, platform, profile) {
+  openModal('Production Brief', idea.title, '<div class="loader" style="display:flex;"><div class="loader-bars"><div class="loader-bar"></div><div class="loader-bar"></div><div class="loader-bar"></div><div class="loader-bar"></div></div><span class="loader-text" style="margin-left:12px;">Writing your complete production brief…</span></div>');
+  try {
+    const raw = await gemini(`${BRAIN}
+
+Write a complete production brief for this video: "${idea.title}"
+Premise: ${idea.premise}
+Trigger: ${idea.trigger} | Platform: ${platform}
+Creator: ${profile || 'Nigerian, Lagos'}
+
+Return this JSON:
+{
+  "opening_3s": "Exact words/visuals for the first 3 seconds",
+  "beats": [
+    {"time": "0:00–0:08", "action": "What happens", "emotion": "Feeling targeted"}
+  ],
+  "caption": "Complete caption with personality, line breaks, 5 relevant Nigerian hashtags",
+  "sound": "Specific audio style that amplifies this emotion",
+  "filming_tip": "One practical tip for filming with just a phone in Lagos",
+  "engagement_hook": "Specific question or poll to put in comments to drive replies"
+}`, 1400);
+
+    const mc = parseJSON(raw);
+    let body = '';
+    body += infoBlock('First 3 Seconds', '#f5c842', formatText(mc.opening_3s || ''));
+
+    if ((mc.beats||[]).length) {
+      body += `<div style="margin-bottom:18px;"><div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#a78bfa;margin-bottom:10px;">Scene Breakdown</div>`;
+      mc.beats.forEach(b => {
+        body += `<div style="display:flex;gap:12px;margin-bottom:8px;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;color:#ff4d6d;flex-shrink:0;line-height:1.5;width:72px;">${escapeHTML(b.time)}</div>
+          <div><div style="font-size:12px;color:var(--text);line-height:1.6;">${formatText(b.action)}</div>${b.emotion?`<div style="font-size:10px;color:var(--muted);font-style:italic;">${escapeHTML(b.emotion)}</div>`:''}</div>
+        </div>`;
+      });
+      body += '</div>';
+    }
+
+    body += `<div style="margin-bottom:14px;"><div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#06d6a0;margin-bottom:8px;">Ready-to-Post Caption</div>
+      <div style="background:var(--s2);padding:12px 15px;border-radius:3px;font-size:12px;white-space:pre-line;color:var(--text);line-height:1.8;">${formatText(mc.caption||'')}</div>
+      <div style="margin-top:7px;">${copyBtn(mc.caption||'','Copy Caption')}</div></div>`;
+
+    body += infoBlock('🎵 Sound Direction', '#a78bfa', formatText(mc.sound||''));
+    body += infoBlock('📱 Filming Tip', '#f5c842', formatText(mc.filming_tip||''));
+    body += infoBlock('💬 Engagement Hook', '#ff4d6d', formatText(mc.engagement_hook||''));
+
+    document.getElementById('modal-body').innerHTML = body;
+    // Re-init copy buttons
+    initCopyBtns();
+  } catch(e) {
+    document.getElementById('modal-body').innerHTML = `<div class="err-box">⚠ ${e.message}</div>`;
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   HOOKS
+════════════════════════════════════════════════════ */
+document.getElementById('hooks-btn').addEventListener('click', async () => {
+  const idea = document.getElementById('hooks-idea').value.trim();
+  if (!idea) return;
+  const platform = document.getElementById('hooks-platform').value;
+  const tone = document.getElementById('hooks-tone').value;
+
+  showLoader('hooks');
+  document.getElementById('hooks-btn').disabled = true;
+
+  try {
+    const raw = await gemini(`${BRAIN}
+
+Write 5 viral hooks + full captions for: "${idea}"
+Platform: ${platform} | Tone: ${tone} | Audience: Nigeria
+
+Each hook must exploit a specific psychological lever. Make them feel like a real person wrote them — specific, charged, human.
+
+Return this exact JSON:
+{
+  "hooks": [
+    {
+      "type": "Psychological technique used",
+      "hook": "Exact opening line — under 15 words. Punchy, specific, irresistible.",
+      "caption": "Full caption with real personality, line breaks, emojis, 5 hashtags popular in Nigeria.",
+      "why": "The specific psychological reason this stops someone mid-scroll"
+    }
+  ]
+}`, 1800);
+
+    const data = parseJSON(raw);
+    const el = document.getElementById('hooks-results');
+    el.innerHTML = '';
+    (data.hooks || []).forEach((h, i) => {
+      el.innerHTML += `
+        <div class="result-card" style="animation-delay:${i*0.07}s;position:relative;">
+          <div style="position:absolute;top:10px;right:14px;font-family:'Bebas Neue',sans-serif;font-size:48px;color:rgba(255,255,255,0.03);line-height:1;">${i+1}</div>
+          ${tag(h.type,'#f5c842')}
+          <div class="hook-quote">"${escapeHTML(h.hook)}"</div>
+          <div class="hook-why">${escapeHTML(h.why)}</div>
+          <div class="hook-caption">${formatText(h.caption||'')}</div>
+          <div style="display:flex;gap:7px;margin-top:12px;justify-content:flex-end;">
+            ${copyBtn(h.hook,'Copy Hook')}
+            ${copyBtn(h.caption||'','Copy Caption')}
+          </div>
+        </div>`;
+    });
+    showResults('hooks');
+    initCopyBtns();
+  } catch(e) { showError('hooks', e.message); }
+  document.getElementById('hooks-btn').disabled = false;
+});
+
+/* ════════════════════════════════════════════════════
+   SCRIPT WRITER
+════════════════════════════════════════════════════ */
+document.getElementById('script-btn').addEventListener('click', async () => {
+  const topic = document.getElementById('script-topic').value.trim();
+  if (!topic) return;
+  const duration = document.getElementById('script-duration').value;
+  const style = document.getElementById('script-style').value;
+
+  showLoader('script');
+  document.getElementById('script-btn').disabled = true;
+
+  try {
+    const raw = await gemini(`${BRAIN}
+
+Write a complete, word-for-word ${duration}-second ${style} video script about: "${topic}"
+Audience: Nigerian social media. Sound like a real person. Use natural rhythm, Nigerian expressions where they land.
+
+Return this JSON:
+{
+  "title": "Catchy video title",
+  "hook_visual": "What the viewer sees in the very first frame — before anyone speaks",
+  "scenes": [
+    {
+      "timestamp": "0:00–0:06",
+      "say": "Exact words to speak",
+      "show": "What the viewer sees — action, expression, text overlay, visual",
+      "emotion": "Feeling this creates in the viewer"
+    }
+  ],
+  "cta": "Exact words for the final call to action",
+  "caption": "Full ready-to-post caption with emojis, line breaks, and 5 Nigerian-relevant hashtags",
+  "director_notes": "3 specific filming tips for this script, phone-based, Lagos conditions"
+}`, 2000);
+
+    const sc = parseJSON(raw);
+    const el = document.getElementById('script-results');
+    el.innerHTML = '';
+
+    // Title card
+    el.innerHTML += `<div class="card" style="border-color:rgba(245,200,66,0.4);margin-bottom:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#f5c842;margin-bottom:6px;">Video Title</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;">${escapeHTML(sc.title||'')}</div>
+        </div>
+        ${tag(duration+'s · '+style,'#f5c842')}
+      </div>
+      ${sc.hook_visual ? `<div style="margin-top:12px;background:var(--s2);padding:10px 14px;border-radius:3px;font-size:11px;color:var(--muted2);border-left:3px solid #a78bfa;line-height:1.65;">
+        <span style="font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:#a78bfa;margin-right:8px;">Opening Frame:</span>${escapeHTML(sc.hook_visual)}</div>` : ''}
+    </div>`;
+
+    // Scenes
+    el.innerHTML += `<div style="margin-bottom:18px;"><div class="sec-label" style="margin-bottom:8px;">Scene-by-Scene Script</div>`;
+    (sc.scenes||[]).forEach(s => {
+      el.innerHTML += `<div class="scene-row">
+        <div class="scene-ts">
+          <div class="scene-ts-time">${escapeHTML(s.timestamp||'')}</div>
+          ${s.emotion?`<div class="scene-ts-emotion">${escapeHTML(s.emotion)}</div>`:''}
+        </div>
+        <div class="scene-say">
+          <div class="scene-col-label" style="color:#f5c842;">Say</div>
+          <div class="scene-say-text">"${escapeHTML(s.say||'')}"</div>
+        </div>
+        <div class="scene-show">
+          <div class="scene-col-label" style="color:#a78bfa;">Show</div>
+          <div class="scene-show-text">${formatText(s.show||'')}</div>
+        </div>
+      </div>`;
+    });
+    el.innerHTML += '</div>';
+
+    // CTA + notes
+    el.innerHTML += `<div class="grid-2" style="margin-bottom:14px;">
+      ${infoBlock('Call to Action','#ff4d6d',formatText(sc.cta||''))}
+      ${infoBlock('Director Notes','#a78bfa',formatText(sc.director_notes||''))}
+    </div>`;
+
+    // Caption
+    if (sc.caption) {
+      el.innerHTML += `<div class="card">
+        <div class="sec-label" style="margin-bottom:8px;">Ready-to-Post Caption</div>
+        <div style="font-size:12px;line-height:1.85;color:var(--muted2);white-space:pre-line;">${formatText(sc.caption)}</div>
+        <div style="margin-top:10px;">${copyBtn(sc.caption,'Copy Caption')}</div>
+      </div>`;
+    }
+
+    showResults('script');
+    initCopyBtns();
+  } catch(e) { showError('script', e.message); }
+  document.getElementById('script-btn').disabled = false;
+});
+
+/* ════════════════════════════════════════════════════
+   CALENDAR
+════════════════════════════════════════════════════ */
+document.getElementById('cal-btn').addEventListener('click', async () => {
+  const niche = document.getElementById('cal-niche').value;
+  const stage = document.getElementById('cal-stage').value;
+
+  showLoader('cal');
+  document.getElementById('cal-btn').disabled = true;
+
+  try {
+    const raw = await gemini(`${BRAIN}
+
+Build a 7-day content calendar for a Nigerian ${niche} creator. Stage: ${stage}.
+They use TikTok, Instagram Reels, and YouTube Shorts. Works 9-5. Power cuts happen. Posts mostly faceless content.
+
+Each idea must be emotionally specific — not "lifestyle content" but real, specific, charged. Think: "POV: I've been in Lagos 4 months and I still feel like an outsider."
+
+Return this JSON:
+{
+  "week_theme": "The overarching emotional narrative connecting this week",
+  "days": [
+    {
+      "day": "Mon",
+      "posts": [
+        {
+          "platform": "tiktok",
+          "time": "7pm",
+          "format": "POV / Storytime / Skit / List / Hot-take",
+          "idea": "Specific emotionally-charged video idea in one punchy sentence",
+          "hook": "Opening line to start the video with",
+          "tip": "One practical execution tip"
+        }
+      ]
+    }
+  ],
+  "power_tip": "One Nigeria-specific insight for this growth stage"
+}`, 1800);
+
+    const cal = parseJSON(raw);
+    const el = document.getElementById('cal-results');
+    el.innerHTML = '';
+
+    // Theme
+    el.innerHTML += `<div style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.3);border-radius:3px;padding:14px 18px;margin-bottom:18px;">
+      <div style="font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#a78bfa;margin-bottom:5px;">This Week's Narrative</div>
+      <div style="font-size:15px;font-weight:700;color:var(--text);">${escapeHTML(cal.week_theme||'')}</div>
+    </div>`;
+
+    // Grid
+    const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const pStyle = p => ({
+      tiktok:    { bg:'rgba(255,45,85,.1)',  bd:'#ff2d55', c:'#ff8fa3' },
+      instagram: { bg:'rgba(225,48,108,.1)', bd:'#e1306c', c:'#f06595' },
+      youtube:   { bg:'rgba(255,0,0,.08)',   bd:'red',     c:'#ff9090' }
+    })[p] || { bg:'rgba(255,255,255,.06)', bd:'#888', c:'#aaa' };
+
+    el.innerHTML += '<div class="cal-grid">';
+    DAYS.forEach(d => {
+      const dayData = (cal.days||[]).find(x => x.day === d);
+      const posts = dayData?.posts || [];
+      el.innerHTML += `<div class="cal-day">
+        <div class="cal-day-header">${d}</div>
+        <div class="cal-day-body">
+          ${posts.length === 0
+            ? '<div style="font-size:8px;color:var(--muted);padding:2px;">Rest ✦</div>'
+            : posts.map(p => { const s = pStyle(p.platform); return `<div class="cal-chip" style="background:${s.bg};border-left-color:${s.bd};color:${s.c};" title="${escapeHTML(p.idea)}"><strong>${escapeHTML(p.time)}</strong> ${escapeHTML(p.format)}</div>`; }).join('')
+          }
+        </div>
+      </div>`;
+    });
+    el.innerHTML += '</div>';
+
+    // Detailed cards
+    (cal.days||[]).filter(d => d.posts?.length).forEach(dy => {
+      dy.posts.forEach(p => {
+        const s = pStyle(p.platform);
+        el.innerHTML += `<div class="card" style="margin-bottom:8px;">
+          <div class="cal-detail">
+            <div class="cal-detail-time">
+              <div class="cal-detail-time-val">${escapeHTML(p.time)}</div>
+              <div class="cal-detail-time-day">${escapeHTML(dy.day)}</div>
+            </div>
+            <div>
+              <div style="display:flex;gap:4px;margin-bottom:6px;">
+                <span class="tag" style="background:${s.bg};color:${s.c};border:1px solid ${s.bd}35;">${escapeHTML(p.platform)}</span>
+                <span style="font-size:8px;color:var(--muted);padding:2px 5px;">${escapeHTML(p.format)}</span>
+              </div>
+              <div class="cal-detail-idea">${escapeHTML(p.idea)}</div>
+              ${p.hook ? `<div class="cal-detail-hook">"${escapeHTML(p.hook)}"</div>` : ''}
+              ${p.tip  ? `<div class="cal-detail-tip">${escapeHTML(p.tip)}</div>` : ''}
+            </div>
+          </div>
+        </div>`;
+      });
+    });
+
+    if (cal.power_tip) {
+      el.innerHTML += `<div style="background:rgba(6,214,160,.07);border:1px solid rgba(6,214,160,.22);padding:14px 18px;margin-top:8px;border-radius:3px;">
+        <div style="font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#06d6a0;margin-bottom:7px;">⚡ Growth Insight</div>
+        <p style="font-size:12px;line-height:1.8;color:var(--muted2);">${escapeHTML(cal.power_tip)}</p>
+      </div>`;
+    }
+
+    showResults('cal');
+  } catch(e) { showError('cal', e.message); }
+  document.getElementById('cal-btn').disabled = false;
+});
+
+/* ════════════════════════════════════════════════════
+   CHECKLIST
+════════════════════════════════════════════════════ */
+const CK_DATA = {
+  tiktok: [
+    { t:'Profile graphic', d:'Bold, recognisable at 40px. Not a selfie — a colour-blocked logo or graphic.', tip:'Same graphic across every platform. Brand consistency = faster recognition.' },
+    { t:'Username', d:'Short. Memorable. No numbers. No underscores. Easy to search and tag.', tip:'Your handle is your brand name. Choose it once. Never change it.' },
+    { t:'Bio (80 characters)', d:'Who you make content for + what they get. One emoji. Soft CTA.', tip:'"Lagos stories, unfiltered 🇳🇬" beats "content creator | lifestyle | travel" every time.' },
+    { t:'Link in bio active', d:'YouTube channel or Linktree. One destination only.', tip:'Linktree free tier is enough. YouTube link is better if that\'s your main platform.' },
+    { t:'First 3 pinned videos', d:'Pin your 3 clearest, most representative videos. Your silent pitch reel.', tip:'Ask: would a stranger know my vibe from just these 3? If not, repin.' },
+    { t:'Category set in TikTok Studio', d:'Helps the algorithm route your content to the right audience. 30 seconds.', tip:'' },
+    { t:'Replying to every comment', d:'First 30 days: reply to everything. Comments signal activity. Activity signals reach.', tip:'20 minutes daily. Block this time like a meeting.' },
+    { t:'TikTok Studio installed', d:'Track analytics from day one. Don\'t analyse for 2 weeks — need data volume first.', tip:'Focus on: average watch time per video and follower growth per video.' },
+  ],
+  instagram: [
+    { t:'Creator account active', d:'Settings → Account → Switch to Professional → Creator. Unlocks analytics.', tip:'' },
+    { t:'Profile graphic matches TikTok', d:'Same graphic. Cross-platform brand recognition builds 3× faster with consistency.', tip:'' },
+    { t:'Username matches TikTok', d:'Same handle everywhere. Collapse friction between platforms.', tip:'' },
+    { t:'Bio with line breaks (150 chars)', d:'Line 1: what you are. Line 2: what you make. Line 3: CTA and link.', tip:'Instagram supports line breaks. Use them. A wall of text gets skipped.' },
+    { t:'Link in bio active', d:'One link. Linktree or YouTube. Make it count.', tip:'' },
+    { t:'First 9 posts planned and live', d:'Your grid is your storefront. Plan 9 cohesive posts before going public.', tip:'Consistent colour palette or border makes the grid look intentional.' },
+    { t:'Story Highlights created', d:'3–5 Highlights: About, Content, Nigeria, FAQs. Custom covers from Canva.', tip:'Treat Highlights as a permanent portfolio — they sell you to every new visitor.' },
+    { t:'Reel thumbnails set', d:'Custom thumbnail for every Reel. A blank frame loses 40% of clicks.', tip:'Bold text overlay on a still frame. Canva. 2 minutes per video.' },
+  ],
+  youtube: [
+    { t:'Channel name matches socials', d:'Same handle everywhere. Recognition compounds over time.', tip:'' },
+    { t:'Channel banner (2560×1440px)', d:'Niche statement + upload schedule. Canva free templates.', tip:'State when you post. Expectations build audience habits.' },
+    { t:'Channel icon = brand graphic', d:'Same graphic as TikTok and Instagram.', tip:'' },
+    { t:'About section with keywords', d:'150–200 words. Who you are, what you make, who it\'s for. Keywords help search.', tip:'YouTube surfaces channels in search based on About keywords. Write for search.' },
+    { t:'Channel trailer live (60–90s)', d:'Who you are + why they should subscribe. Faceless works — text + music is enough.', tip:'This autoplays for non-subscribers. Make it your strongest pitch.' },
+    { t:'2–3 playlists organised', d:'Group content into playlists from day one. Playlists extend session watch time.', tip:'' },
+    { t:'End screens on every video', d:'Point to another video or subscribe button. Set a template and apply every upload.', tip:'' },
+    { t:'Analytics tracked', d:'Two numbers that matter: average view duration and click-through rate.', tip:'Targets: 40%+ CTR, 50%+ average view duration. Build toward these every video.' },
+  ]
+};
+
+let ckState = { tiktok: new Array(8).fill(false), instagram: new Array(8).fill(false), youtube: new Array(8).fill(false) };
+let ckPlat = 'tiktok';
+
+function renderChecklist() {
+  const items = CK_DATA[ckPlat];
+  const done = ckState[ckPlat].filter(Boolean).length;
+  const pct = Math.round((done / items.length) * 100);
+  document.getElementById('ck-progress').style.width = pct + '%';
+  document.getElementById('ck-progress-label').textContent = `${done} of ${items.length} done · ${pct}%`;
+  const list = document.getElementById('ck-list');
+  list.innerHTML = '';
+  items.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'ck-item' + (ckState[ckPlat][i] ? ' done' : '');
+    div.innerHTML = `
+      <div class="ck-box ${ckState[ckPlat][i] ? 'checked' : ''}"><span class="ck-check">✓</span></div>
+      <div>
+        <div class="ck-title">${item.t}</div>
+        <div class="ck-desc">${item.d}</div>
+        ${item.tip ? `<div class="ck-tip">💡 ${item.tip}</div>` : ''}
+      </div>`;
+    div.addEventListener('click', () => {
+      ckState[ckPlat][i] = !ckState[ckPlat][i];
+      renderChecklist();
+    });
+    list.appendChild(div);
+  });
+}
+
+document.querySelectorAll('.plat-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    ckPlat = tab.dataset.plat;
+    const colors = { tiktok: '#ff2d55', instagram: '#e1306c', youtube: 'red' };
+    document.querySelectorAll('.plat-tab').forEach(t => {
+      t.classList.remove('active');
+      t.style.borderColor = 'var(--border)';
+      t.style.color = 'var(--muted2)';
+      t.style.background = 'none';
+    });
+    tab.classList.add('active');
+    tab.style.borderColor = colors[ckPlat];
+    tab.style.color = colors[ckPlat];
+    tab.style.background = colors[ckPlat] + '18';
+    renderChecklist();
+  });
+});
+renderChecklist();
+
+/* ════════════════════════════════════════════════════
+   MONEY MAP
+════════════════════════════════════════════════════ */
+const PHASES = [
+  {
+    dot:'#ff4d6d', label:'Phase 1 · Months 0–3', title:'Build. Post. Make Zero. Win.',
+    desc:'The creators who make it are the ones who don\'t quit in month 2. Every post trains the algorithm. Every reply you give is a vote for your reach. You are not trying to go viral. You are building a signal.',
+    items:[
+      { n:'📱 Volume First', d:'4–5×/week on TikTok + Instagram Reels. Same content, two platforms, double reach for zero extra work.', e:'Goal: 100 followers on each' },
+      { n:'💬 Engage Like It\'s Your Job', d:'Comment on 20+ posts daily in your niche. Reply to every comment you receive. Your first 100 come from you, not the algorithm.', e:'Goal: 5%+ engagement rate' },
+      { n:'🎬 Buffer Content', d:'Batch 5–7 videos when you have power and data. NEPA will not stop your consistency. Always 2 weeks ahead.', e:'Rule: Never below 1 week buffer' },
+      { n:'📺 Open YouTube Now', d:'Upload your Reels as Shorts. The watch-hour clock starts immediately. Don\'t wait until you\'re "ready".', e:'Goal: 10+ Shorts live' },
+    ]
+  },
+  {
+    dot:'#f5c842', label:'Phase 2 · Months 3–9', title:'First Money. Affiliate & Brand Deals.',
+    desc:'You don\'t need 100K followers to make money. A creator with 3K engaged followers and 12% engagement will get brand deals before someone with 50K and 0.4% engagement. Engagement is your currency.',
+    items:[
+      { n:'🛒 Jumia Affiliate', d:'Nigeria\'s biggest e-commerce. No follower minimum. Commission per sale. Promote products your audience actually buys.', e:'₦20,000–₦150,000/month' },
+      { n:'📚 Expertnaire', d:'50–80% commission on Nigerian digital products and courses. High ticket means serious income from small audiences.', e:'Top affiliates earn ₦500,000+/month' },
+      { n:'🤝 Nano Brand Deals', d:'At 1K–5K followers, DM small Lagos brands — skincare, food, lifestyle. Your engagement rate is the pitch.', e:'₦40,000–₦150,000 per post' },
+      { n:'🎁 TikTok LIVE Gifts', d:'Go live 3×/week. Virtual gifts convert to real money. No follower minimum in Nigeria.', e:'Grows with community size' },
+    ]
+  },
+  {
+    dot:'#06d6a0', label:'Phase 3 · Month 9+', title:'Stack. Platform Revenue. Own Product.',
+    desc:'Multiple income streams from the same content. A creator with 4 streams earns 5–10× what a creator with only one stream earns at the same follower count.',
+    items:[
+      { n:'📺 YouTube AdSense', d:'$1.50–$6.00 RPM for Nigerian creators. Most reliable, passive, long-term income. Start it now so the clock runs.', e:'Unlocks: 1,000 subs + 4,000 watch hours' },
+      { n:'💼 Instagram Brand Deals', d:'At 10K+ followers, macro deals open. Nigerian macro influencers command ₦700,000+ per sponsored post.', e:'₦700,000+ per sponsored post' },
+      { n:'🏪 Your Own Product', d:'Selar or Gumroad. Templates, guides, mini-courses. You know your audience now. Build for them.', e:'Unlimited ceiling' },
+      { n:'📘 Facebook Reels Bonus', d:'Open to Nigeria. Same content you already post. A fourth income stream with zero additional filming.', e:'Requires: 5,000 followers' },
+    ]
+  }
+];
+
+const phasesEl = document.getElementById('money-phases');
+PHASES.forEach(ph => {
+  phasesEl.innerHTML += `
+    <div class="money-phase">
+      <div class="money-dot" style="background:${ph.dot}30;border:2px solid ${ph.dot};"></div>
+      <div class="money-phase-label">${ph.label}</div>
+      <div class="money-phase-title">${ph.title}</div>
+      <div class="money-phase-desc">${ph.desc}</div>
+      <div class="money-items">
+        ${ph.items.map(it => `<div class="money-item">
+          <div class="money-item-name">${it.n}</div>
+          <div class="money-item-desc">${it.d}</div>
+          <div class="money-item-earn">${it.e}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+});
+
+/* ════════════════════════════════════════════════════
+   VIDEO STUDIO
+════════════════════════════════════════════════════ */
+const THEMES = {
+  'cinematic-night': { bg0:'#04030d', bg1:'#0a0520', bg2:'#0d0a1f', ac:'#a78bfa', ac2:'#ff4d6d', txt:'#f0eee8', mut:'rgba(240,238,232,0.45)', name:'Night Cinema', grad:'linear-gradient(135deg,#04030d,#0a0520)' },
+  'afro-heat':       { bg0:'#0c0400', bg1:'#1a0700', bg2:'#200c00', ac:'#ff7c43', ac2:'#f5c842', txt:'#fff5e0', mut:'rgba(255,245,224,0.45)', name:'Afro Heat',    grad:'linear-gradient(135deg,#0c0400,#200c00)' },
+  'lagoon':          { bg0:'#00080d', bg1:'#001218', bg2:'#001820', ac:'#06d6a0', ac2:'#6ab3c8', txt:'#e0f5f0', mut:'rgba(224,245,240,0.45)', name:'Lagos Lagoon', grad:'linear-gradient(135deg,#00080d,#001820)' },
+  'editorial':       { bg0:'#f2ede4', bg1:'#e8e0d0', bg2:'#ddd4c0', ac:'#0d0d14', ac2:'#c94c2e', txt:'#0d0d14', mut:'rgba(13,13,20,0.42)',   name:'Editorial',   grad:'linear-gradient(135deg,#f2ede4,#ddd4c0)' },
+  'naija-gold':      { bg0:'#080600', bg1:'#141000', bg2:'#1c1600', ac:'#f5c842', ac2:'#06d6a0', txt:'#fffbe0', mut:'rgba(255,251,224,0.45)', name:'Naija Gold',  grad:'linear-gradient(135deg,#080600,#1c1600)' },
+  'blood-moon':      { bg0:'#0d0000', bg1:'#1a0000', bg2:'#200400', ac:'#ff4d6d', ac2:'#ff7c43', txt:'#fff0f0', mut:'rgba(255,240,240,0.45)', name:'Blood Moon',  grad:'linear-gradient(135deg,#0d0000,#200400)' },
+};
+
+let curTheme = 'cinematic-night';
+let curAnim  = 'breathe';
+
+// Build theme swatches
+const themeGrid = document.getElementById('theme-grid');
+Object.entries(THEMES).forEach(([k, v]) => {
+  const sw = document.createElement('div');
+  sw.className = 'theme-swatch' + (k === curTheme ? ' active' : '');
+  sw.style.background = v.grad;
+  sw.innerHTML = `<span class="theme-name">${v.name}</span>`;
+  sw.addEventListener('click', () => {
+    curTheme = k;
+    document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
+    sw.classList.add('active');
+  });
+  themeGrid.appendChild(sw);
+});
+
+// Build anim buttons
+const animBtnsEl = document.getElementById('anim-btns');
+['Breathe','Reveal','Glitch','Typewriter','Float'].forEach(a => {
+  const b = document.createElement('button');
+  b.className = 'anim-btn' + (a.toLowerCase() === curAnim ? ' active' : '');
+  b.textContent = a;
+  b.addEventListener('click', () => {
+    curAnim = a.toLowerCase();
+    document.querySelectorAll('.anim-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+  });
+  animBtnsEl.appendChild(b);
+});
+
+// ── Canvas setup ──────────────────────────────────
+const studioCanvas = document.getElementById('studio-canvas');
+studioCanvas.width  = 450;
+studioCanvas.height = 800;
+const sCtx = studioCanvas.getContext('2d');
+let studioRafId = null;
+let studioRunning = false;
+
+function studioDrawFrame(ts, scheduleNext = true) {
+  const W = 450, H = 800;
+  const th = THEMES[curTheme];
+  const t  = ts / 1000;
+  const vcText   = (document.getElementById('vc-text').value   || '').trim();
+  const vcSub    = (document.getElementById('vc-sub').value    || '').trim();
+  const vcHandle = (document.getElementById('vc-handle').value || '').trim();
+
+  const breathe = curAnim === 'breathe' ? 0.7 + Math.sin(t * 0.8) * 0.3 : 1;
+  const floatY  = curAnim === 'float'   ? Math.sin(t * 0.5) * 18 : 0;
+
+  // ── Background ──
+  const bg = sCtx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, th.bg0); bg.addColorStop(0.5, th.bg1); bg.addColorStop(1, th.bg2);
+  sCtx.fillStyle = bg; sCtx.fillRect(0, 0, W, H);
+
+  // ── Radial glows ──
+  [[W*.85,H*.15,W*.7,th.ac+'28',th.ac+'0a'],[W*.1,H*.85,W*.6,th.ac2+'18','transparent']].forEach(([cx,cy,r,c1,c2])=>{
+    const g=sCtx.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,c1);g.addColorStop(0.5,c2);g.addColorStop(1,'transparent');sCtx.fillStyle=g;sCtx.fillRect(0,0,W,H);
+  });
+
+  // ── Film grain ──
+  const dark = curTheme !== 'editorial';
+  for(let i=0;i<900;i++){sCtx.fillStyle=`rgba(${dark?'255,255,255':'0,0,0'},${Math.random()*(dark?.035:.02)})`;sCtx.fillRect(Math.random()*W,Math.random()*H,1,1);}
+
+  // ── Diagonal rule lines ──
+  sCtx.save();sCtx.globalAlpha=.05;sCtx.strokeStyle=th.ac;sCtx.lineWidth=1;
+  for(let i=-5;i<12;i++){sCtx.beginPath();sCtx.moveTo(i*60-30,0);sCtx.lineTo(i*60+H*.4+30,H);sCtx.stroke();}
+  sCtx.restore();
+
+  // ── Left vertical accent bar ──
+  const bary=(H-120)/2+floatY*.5;
+  const barG=sCtx.createLinearGradient(0,bary,0,bary+120);barG.addColorStop(0,'transparent');barG.addColorStop(.5,th.ac);barG.addColorStop(1,'transparent');
+  sCtx.fillStyle=barG;sCtx.fillRect(0,bary,3,120);
+
+  // ── Decorative circles top-right ──
+  sCtx.save();sCtx.globalAlpha=.11*breathe;sCtx.strokeStyle=th.ac;sCtx.lineWidth=1;
+  sCtx.beginPath();sCtx.arc(W*.82,H*.2,70+Math.sin(t*.6)*8,0,Math.PI*2);sCtx.stroke();
+  sCtx.globalAlpha=.05*breathe;sCtx.beginPath();sCtx.arc(W*.82,H*.2,96+Math.sin(t*.4)*10,0,Math.PI*2);sCtx.stroke();
+  sCtx.restore();
+
+  // ── Handle text ──
+  sCtx.font="500 17px 'DM Sans',sans-serif";sCtx.fillStyle=th.mut;sCtx.textAlign='left';
+  sCtx.fillText(vcHandle||'@yourhandle',36,66+floatY*.2);
+
+  // ── Top divider ──
+  const hdG=sCtx.createLinearGradient(36,0,W-36,0);hdG.addColorStop(0,th.ac+'88');hdG.addColorStop(.5,th.ac+'dd');hdG.addColorStop(1,'transparent');
+  sCtx.strokeStyle=hdG;sCtx.lineWidth=1;sCtx.beginPath();sCtx.moveTo(36,82);sCtx.lineTo(W-36,82);sCtx.stroke();
+
+  // ── Headline ──
+  const rawText = vcText || 'Your headline here…';
+  let dText = rawText;
+  if(curAnim==='typewriter'){const ch=Math.floor(t*11)%(rawText.length+18);dText=rawText.slice(0,Math.min(ch,rawText.length));}
+  const fSize = rawText.length>55?36:rawText.length>35?43:50;
+  sCtx.font=`700 ${fSize}px 'Bebas Neue',sans-serif`;
+  const maxTW=W-72, lineH=sCtx.measureText('M').width*1.35;
+  const lines=[];let ln='';
+  dText.split(' ').forEach(w=>{const tst=ln+(ln?' ':'')+w;if(sCtx.measureText(tst).width>maxTW&&ln){lines.push(ln);ln=w;}else ln=tst;});
+  if(ln)lines.push(ln);
+  const totH=lines.length*(lineH+5), sY=H*.5-totH/2+floatY;
+  const revP=curAnim==='reveal'?Math.min(1,t*.75):1;
+  sCtx.save();
+  lines.forEach((l,i)=>{
+    const y=sY+i*(lineH+5);
+    const lr=curAnim==='reveal'?Math.min(1,Math.max(0,revP*lines.length-i)):1;
+    sCtx.globalAlpha=lr;
+    if(curAnim==='glitch'&&Math.sin(t*7)>.72&&Math.random()>.5){
+      const off=(Math.random()-.5)*10;
+      sCtx.fillStyle=th.ac+'bb';sCtx.fillText(l,36+off,y);
+      sCtx.fillStyle=th.ac2+'bb';sCtx.fillText(l,36-off,y+2);
+    }
+    sCtx.fillStyle=th.txt;sCtx.fillText(l,36,y);
+  });
+  sCtx.restore();
+
+  // ── Subtext ──
+  if(vcSub){
+    const sy2=sY+totH+20+floatY*.5;
+    sCtx.font="500 21px 'DM Sans',sans-serif";sCtx.fillStyle=th.ac2;sCtx.globalAlpha=.88;
+    sCtx.fillText(vcSub,36,sy2);sCtx.globalAlpha=1;
+  }
+
+  // ── Bottom divider ──
+  const bdG=sCtx.createLinearGradient(36,0,W-36,0);bdG.addColorStop(0,th.ac+'cc');bdG.addColorStop(.6,th.ac+'44');bdG.addColorStop(1,'transparent');
+  sCtx.strokeStyle=bdG;sCtx.lineWidth=1;sCtx.beginPath();sCtx.moveTo(36,H-68);sCtx.lineTo(W-36,H-68);sCtx.stroke();
+
+  // ── Pulse rings bottom-right ──
+  if(curAnim==='breathe'||curAnim==='float'){
+    for(let r=0;r<3;r++){
+      const rad=10+r*14+Math.sin(t*1.2+r*.8)*5;
+      sCtx.save();sCtx.globalAlpha=(0.45-r*.1)*breathe;sCtx.strokeStyle=th.ac;sCtx.lineWidth=1.5;
+      sCtx.beginPath();sCtx.arc(W-38,H-38,rad,0,Math.PI*2);sCtx.stroke();sCtx.restore();
+    }
+  }
+
+  // ── Footer branding ──
+  sCtx.font="400 14px 'DM Sans',sans-serif";sCtx.fillStyle=th.mut;sCtx.textAlign='left';
+  sCtx.fillText('CreatorOS',36,H-36);
+  sCtx.font="400 12px 'DM Sans',sans-serif";
+  sCtx.fillText('Faceless. Original. Yours.',36,H-17);
+
+  if (scheduleNext) {
+    studioRafId = requestAnimationFrame(studioDrawFrame);
+  }
+}
+
+function ensureStudioRunning() {
+  if (!studioRunning) {
+    studioRunning = true;
+    studioCanvas.width  = 450;
+    studioCanvas.height = 800;
+    const statusEl = document.getElementById('studio-status');
+    if(statusEl) statusEl.style.display = 'flex';
+    document.getElementById('studio-status-text').textContent = '● Canvas rendering live — edit headline, pick theme, choose animation';
+    studioRafId = requestAnimationFrame(studioDrawFrame);
+  }
+}
+
+// Start immediately — canvas has explicit dimensions in HTML so it's safe
+ensureStudioRunning();
+
+// Also re-trigger on nav click just in case
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(btn.dataset.page === 'studio') ensureStudioRunning();
+  });
+});
+
+// ── AI Text Generation ────────────────────────────
+document.getElementById('vc-ai-btn').addEventListener('click', async () => {
+  const prompt = document.getElementById('vc-ai-prompt').value.trim();
+  if (!prompt) return;
+  const btn = document.getElementById('vc-ai-btn');
+  const aiStatus = document.getElementById('studio-ai-status');
+  const aiBar    = document.getElementById('studio-ai-bar');
+
+  btn.disabled = true; btn.textContent = '✦ Generating…';
+  aiStatus.style.display = 'block'; aiBar.style.width = '0%';
+
+  // Animate progress bar while waiting
+  let pct = 0;
+  const barInt = setInterval(() => {
+    pct = Math.min(pct + (Math.random() * 8), 88);
+    aiBar.style.width = pct + '%';
+  }, 200);
+
+  try {
+    const raw = await gemini(`You are a viral content strategist. Generate punchy visual card text for a social media video.
+Return ONLY a raw JSON object — no markdown, no backticks, no explanation:
+{"headline":"max 8 words, emotionally charged, specific, Nigerian context","subtext":"2-4 words, punchy label or episode tag"}
+Topic: ${prompt}`);
+    clearInterval(barInt);
+    aiBar.style.width = '100%';
+    const d = parseJSON(raw);
+    if(d.headline) document.getElementById('vc-text').value = d.headline;
+    if(d.subtext)  document.getElementById('vc-sub').value  = d.subtext;
+    setTimeout(() => { aiStatus.style.display = 'none'; aiBar.style.width = '0%'; }, 800);
+  } catch(e) {
+    clearInterval(barInt);
+    aiStatus.style.display = 'none';
+    alert('⚠ ' + e.message);
+  }
+  btn.textContent = '✦ Generate Visual Text'; btn.disabled = false;
+});
+
+// ── Download PNG ──────────────────────────────────
+document.getElementById('vc-dl-btn').addEventListener('click', () => {
+  // Draw one frame synchronously without RAF loop interference
+  if(studioRafId){ cancelAnimationFrame(studioRafId); studioRafId = null; }
+  studioCanvas.width = 450; studioCanvas.height = 800;
+  // Draw using current timestamp — no RAF scheduling
+  studioDrawFrame(5000, false); // t=5 gives a mid-animation state
+  const a = document.createElement('a');
+  a.download = `creatorOS-${Date.now()}.png`;
+  a.href = studioCanvas.toDataURL('image/png');
+  a.click();
+  // Resume loop
+  studioRafId = requestAnimationFrame(studioDrawFrame);
+});
+
+// ── Download Real Video (WebM via MediaRecorder) ──
+document.getElementById('vc-dl-video').addEventListener('click', async () => {
+  const btn = document.getElementById('vc-dl-video');
+  const recStatus = document.getElementById('studio-rec-status');
+  const recBar    = document.getElementById('studio-rec-bar');
+  const recLabel  = document.getElementById('studio-rec-label');
+
+  // Check MediaRecorder support
+  if (!window.MediaRecorder) {
+    alert('⚠ Your browser does not support video recording. Please use Chrome or Edge. You can still download PNG.');
+    return;
+  }
+  // Check canvas stream support
+  if (!studioCanvas.captureStream) {
+    alert('⚠ Canvas video capture not supported in this browser. Please use Chrome or Edge.');
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = '⏺ Recording…';
+  recStatus.style.display = 'block'; recBar.style.width = '0%';
+
+  const DURATION = 6000; // 6 seconds
+  const chunks = [];
+
+  try {
+    const stream = studioCanvas.captureStream(30); // 30fps
+    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+      ? 'video/webm;codecs=vp9'
+      : MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+      ? 'video/webm;codecs=vp8'
+      : 'video/webm';
+
+    const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 4000000 });
+    recorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+
+    recorder.onstop = () => {
+      recStatus.style.display = 'none';
+      const blob = new Blob(chunks, { type: mime });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.download = `creatorOS-video-${Date.now()}.webm`;
+      a.href = url;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      btn.disabled = false; btn.textContent = '⬇ Download Video (WebM)';
+    };
+
+    recorder.start(100); // collect data every 100ms
+
+    // Progress bar
+    const start = performance.now();
+    const progInt = setInterval(() => {
+      const elapsed = performance.now() - start;
+      const pct = Math.min((elapsed / DURATION) * 100, 100);
+      recBar.style.width = pct + '%';
+      const sec = Math.min(Math.floor(elapsed / 1000), 6);
+      recLabel.textContent = `● Recording video… ${sec}s / 6s`;
+    }, 100);
+
+    setTimeout(() => {
+      clearInterval(progInt);
+      recBar.style.width = '100%';
+      recLabel.textContent = '✓ Encoding video file…';
+      recorder.stop();
+    }, DURATION);
+
+  } catch(e) {
+    recStatus.style.display = 'none';
+    btn.disabled = false; btn.textContent = '⬇ Download Video (WebM)';
+    alert('⚠ Video recording failed: ' + e.message + '\n\nTry Download PNG instead.');
+  }
+});
+
+// ── How to Post guide ─────────────────────────────
+document.getElementById('vc-guide-btn').addEventListener('click', () => {
+  openModal('How to Post', 'Use your video on TikTok / Reels / Shorts',
+    `<div style="font-size:12px;color:var(--muted2);line-height:1.9;">
+      <div style="background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.25);border-radius:3px;padding:10px 14px;margin-bottom:16px;">
+        <div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#06d6a0;margin-bottom:5px;">Recommended workflow</div>
+        <p style="font-size:12px;color:var(--text);font-weight:600;">Click "Download Video (WebM)" → upload directly to TikTok, Instagram Reels, or YouTube Shorts → add trending audio inside the app.</p>
+      </div>
+      <p style="margin-bottom:10px;"><strong style="color:var(--text);">Why WebM?</strong> It's a real video file (6 seconds, 30fps, ~4Mbps). All major platforms accept it. TikTok, Instagram, and YouTube will re-encode it when you upload.</p>
+      <p style="margin-bottom:10px;"><strong style="color:var(--text);">Chrome/Edge only for video:</strong> The video recorder uses browser technology only available in Chrome and Edge. Safari users can download PNG instead.</p>
+      <p style="margin-bottom:10px;"><strong style="color:var(--text);">Adding audio:</strong> Upload the video file to TikTok or Instagram Reels and add a trending sound inside their editor. This gives you reach without recording your voice.</p>
+      <p style="margin-bottom:14px;"><strong style="color:var(--text);">PNG option:</strong> Download PNG gives you a still frame — useful for thumbnails or posting as an image with a caption.</p>
+      <div style="background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.25);border-radius:3px;padding:10px 14px;">
+        <div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#f5c842;margin-bottom:5px;">🇳🇬 Nigeria Tip</div>
+        <p style="font-size:11px;color:var(--muted2);">Batch 5–7 different cards while you have light and data. Download all videos. Post one daily even when NEPA takes light. Buffer = consistency = growth.</p>
+      </div>
+    </div>`
+  );
+});
+
+/* ════════════════════════════════════════════════════
+   COPY BUTTON INIT (called after dynamic content renders)
+════════════════════════════════════════════════════ */
+function initCopyBtns() {
+  document.querySelectorAll('.copy-btn[id]').forEach(btn => {
+    if (btn._inited) return;
+    btn._inited = true;
+  });
+}
+</script>
+</body>
+</html>
